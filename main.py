@@ -35,7 +35,7 @@ def get_arg_parser():
     parser.add_argument('-dataset_fraction', default=1, type=float) 
     parser.add_argument('-dataset', default="comma", type=str)  
     parser.add_argument('-backbone', default="resnet", type=str) 
-    parser.add_argument('-dataset_path', default="/data1/jessica/data/toyota/", type=str) 
+    parser.add_argument('-dataset_path', default="/data1/jessica/data/toyota", type=str) 
     parser.add_argument('-concept_features', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-new_version', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-intervention_prediction', action=argparse.BooleanOptionalAction) 
@@ -63,10 +63,12 @@ if __name__ == "__main__":
    
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", min_delta=0.05, patience=5, verbose=False, mode="max")
     #initialize the model and module, the module is a wrapper around the model that handles the training and testing
-    model = VTN(multitask=multitask, backbone=args.backbone, concept_features=args.concept_features, device = f"cuda:{args.gpu_num}", train_concepts=args.train_concepts)
+    device = "cuda:0" if torch.cuda.is_available() else "cpu"
+    model = VTN(multitask=multitask, backbone=args.backbone, concept_features=args.concept_features, device = device, train_concepts=args.train_concepts)
     module = LaneModule(model, multitask=multitask, dataset = args.dataset, bs=args.bs, ground_truth=args.ground_truth, intervention=args.intervention_prediction, dataset_path=args.dataset_path, dataset_fraction=args.dataset_fraction)
 
-    ckpt_pth = f"{args.dataset_path}/ckpts_final/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}/"
+    ckpt_pth = f"{args.dataset_path}ckpts_final/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
+    print(ckpt_pth)
     checkpoint_callback = ModelCheckpoint(save_top_k=2, monitor="val_loss_accumulated")
     logger = TensorBoardLogger(save_dir=ckpt_pth)
 
@@ -74,26 +76,27 @@ if __name__ == "__main__":
     if not os.path.exists(path):
         os.makedirs(path)
     vs = os.listdir(path)
-    filt = []
+    filt = [elem for elem in vs if 'version' in elem]
     f_name, resume_path = 'None', 'None'
+    resume = None
+
     if not args.new_version and not args.test:
-        for elem1 in vs: 
-            if 'version' in elem1:
-                filt.append(elem1)
-        versions =[elem.split("_")[-1]for elem in filt]
-        versions = sorted(versions)
-        version = f"version_{versions[-1]}"
-        resume_path = path + version + "/checkpoints/"
-        files = os.listdir(resume_path)
-        print(files)
-        for f in files: 
-            if "ckpt" in f:
-                f_name = f
-                break
-            else: 
-                f_name = None
-        print(f_name)
-    resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
+        if filt:
+            versions = [elem.split("_")[-1] for elem in filt]
+            versions = sorted(versions)
+            version = f"version_{versions[-1]}"
+            resume_path = os.path.join(path, version, "checkpoints")
+            if os.path.exists(resume_path):
+                files = os.listdir(resume_path)
+                for f in files:
+                    if "ckpt" in f:
+                        f_name = f
+                        break
+                if f_name and os.path.exists(os.path.join(resume_path, f_name)):
+                    resume = os.path.join(resume_path, f_name)
+        else:
+            print("⚠️ Nessuna versione precedente trovata, si procede senza resume.")
+    
     print(f"RESUME FROM: {resume}")
 
     trainer = pl.Trainer(
