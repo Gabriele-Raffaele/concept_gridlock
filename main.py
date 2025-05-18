@@ -12,6 +12,7 @@ from pathlib import Path
 import pandas as pd 
 import os
 
+''' Save predictions to csv file'''
 def save_preds(logits, target, save_name, p):
     b, s = target.shape
     df = pd.DataFrame()
@@ -19,6 +20,7 @@ def save_preds(logits, target, save_name, p):
     df['target'] = target.squeeze().reshape(b*s).tolist()
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
 
+'''Define the argument parser'''
 def get_arg_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('-task', default="", type=str)  
@@ -46,18 +48,21 @@ def get_arg_parser():
     return parser
 
 if __name__ == "__main__":
+   # empty the cache and set the max split size to avoid fragmentation 
     torch.cuda.empty_cache()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:50"
 
     if torch.cuda.device_count() > 0 and torch.cuda.get_device_capability()[0] >= 7:
         # Set the float32 matrix multiplication precision to 'high'
         torch.set_float32_matmul_precision('high')
-
+    
+    # parse the arguments
     parser = get_arg_parser()
     args = parser.parse_args()
     multitask = args.task
    
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", min_delta=0.05, patience=5, verbose=False, mode="max")
+    #initialize the model and module, the module is a wrapper around the model that handles the training and testing
     model = VTN(multitask=multitask, backbone=args.backbone, concept_features=args.concept_features, device = f"cuda:{args.gpu_num}", train_concepts=args.train_concepts)
     module = LaneModule(model, multitask=multitask, dataset = args.dataset, bs=args.bs, ground_truth=args.ground_truth, intervention=args.intervention_prediction, dataset_path=args.dataset_path, dataset_fraction=args.dataset_fraction)
 
@@ -90,6 +95,7 @@ if __name__ == "__main__":
         print(f_name)
     resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
     print(f"RESUME FROM: {resume}")
+
     trainer = pl.Trainer(
         fast_dev_run=args.dev_run,
         #gpus=2, 

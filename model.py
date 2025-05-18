@@ -15,6 +15,7 @@ def dfs_freeze(model):
             param.requires_grad = False
         dfs_freeze(child)
 
+''' This is a modified version of the Longformer model from Huggingface.'''
 class VTNLongformerModel(LongformerModel):
     def __init__(self,
                  embed_dim=2048,
@@ -43,7 +44,9 @@ class VTNLongformerModel(LongformerModel):
         super(VTNLongformerModel, self).__init__(self.config, add_pooling_layer=False)
         self.embeddings.word_embeddings = None  # to avoid distributed error of unused parameters
 
-
+'''
+This is a modified version of the pad_to_window_size function from Huggingface.
+It is used to pad the input tensors to a size that is divisible by the attention window size.'''
 def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tensor, position_ids: torch.Tensor,
                              one_sided_window_size: int, pad_token_id: int):
     '''A helper function to pad tokens and mask to work with the sliding_chunks implementation of Longformer self-attention.
@@ -65,7 +68,8 @@ def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tens
     position_ids = F.pad(position_ids, (1, padding_len), value=False)  # no attention on the padding tokens
     return input_ids, attention_mask, position_ids
 
-
+''' This is a modified version of the VTN model from Huggingface.
+It is used to build the VTN model.'''
 class VTN(nn.Module):
     """
     VTN model builder. It uses ViT-Base or Resnet as the backbone.
