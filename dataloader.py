@@ -59,17 +59,17 @@ class ONCEDataset(Dataset):
         self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         self.normalize_values = False
         if dataset_type == "train":
-            data_path = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_train.hdf5"
-            data_path1 = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_train_medium_0-33.hdf5"
-            data_path2 = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_train_medium_34end.hdf5"
+            data_path = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_train.hdf5"
+            data_path1 = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_train_medium_0-33.hdf5"
+            data_path2 = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_train_medium_34end.hdf5"
             paths = [data_path, data_path1, data_path2]
         elif dataset_type == "test":
-            data_path1 = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_test.hdf5"
-            data_path = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_val.hdf5"
+            data_path1 = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_test.hdf5"
+            data_path = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_val.hdf5"
             paths = [data_path, data_path1]  
         elif dataset_type == "val":
-            data_path1 = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_test.hdf5"
-            data_path = "/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_val.hdf5"
+            data_path1 = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_test.hdf5"
+            data_path = "/content/concept_gridlock/data1/jessica/data/toyota/once_w_lanes_compressed_raw_small_multitask_all_val.hdf5"
             paths = [data_path, data_path1]
         self.people_seqs = []
         for data_path in paths:
