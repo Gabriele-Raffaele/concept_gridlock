@@ -29,7 +29,7 @@ class NUScenesDataset(Dataset):
         self.return_full = return_full
         self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         self.resize = transforms.Resize((224,224))
-        data_path = f'{dataset_path}/nuscenes/test_mini_nuscenes.hfd5' if dataset_type == "val" else (f'{dataset_path}/nuscenes/train_consec_nuscenes.hfd5' if dataset_type == "train" else f'{dataset_path}/nuscenes/train_2_2_consec_nuscenes.hfd5')
+        data_path = f'{dataset_path}/nuscenes/test_mini_nuscenes.hdf5' if dataset_type == "val" else (f'{dataset_path}/nuscenes/train_consec_nuscenes.hdf5' if dataset_type == "train" else f'{dataset_path}/nuscenes/train_2_2_consec_nuscenes.hdf5')
         self.h5_file = h5py.File(data_path, "r")
         self.keys = list(self.h5_file.keys())
         corrupt_idx = 24
@@ -37,10 +37,10 @@ class NUScenesDataset(Dataset):
             self.keys.pop(corrupt_idx)
         
         '''if dataset_type == "test":
-            p = f'{dataset_path}/nuscenes/test_2_consec_nuscenes.hfd5'
+            p = f'{dataset_path}/nuscenes/test_2_consec_nuscenes.hdf5'
             self.h5_file2 = h5py.File(p, "r")
             self.keys2 = list(self.h5_file2.keys())
-            p = f'{dataset_path}/nuscenes/test_3_consec_nuscenes.hfd5'
+            p = f'{dataset_path}/nuscenes/test_3_consec_nuscenes.hdf5'
             self.h5_file3 = h5py.File(p, "r")
             self.keys3 = list(self.h5_file3.keys())'''
 
