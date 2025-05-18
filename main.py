@@ -35,7 +35,7 @@ def get_arg_parser():
     parser.add_argument('-dataset_fraction', default=1, type=float) 
     parser.add_argument('-dataset', default="comma", type=str)  
     parser.add_argument('-backbone', default="resnet", type=str) 
-    parser.add_argument('-dataset_path', default="/data1/jessica/data/toyota", type=str) 
+    parser.add_argument('-dataset_path', default="/data1/jessica/data/toyota/", type=str) 
     parser.add_argument('-concept_features', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-new_version', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-intervention_prediction', action=argparse.BooleanOptionalAction) 
