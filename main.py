@@ -35,7 +35,7 @@ def get_arg_parser():
     parser.add_argument('-dataset_fraction', default=1, type=float) 
     parser.add_argument('-dataset', default="comma", type=str)  
     parser.add_argument('-backbone', default="resnet", type=str) 
-    parser.add_argument('-dataset_path', default="/content/concept_gridlock/data1/jessica/data/toyota", type=str) 
+    parser.add_argument('-dataset_path', default="/kaggle/input/hdf5-chunk1/", type=str) 
     parser.add_argument('-concept_features', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-new_version', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-intervention_prediction', action=argparse.BooleanOptionalAction) 
@@ -67,7 +67,7 @@ if __name__ == "__main__":
     model = VTN(multitask=multitask, backbone=args.backbone, concept_features=args.concept_features, device = device, train_concepts=args.train_concepts)
     module = LaneModule(model, multitask=multitask, dataset = args.dataset, bs=args.bs, ground_truth=args.ground_truth, intervention=args.intervention_prediction, dataset_path=args.dataset_path, dataset_fraction=args.dataset_fraction)
 
-    ckpt_pth = f"{args.dataset_path}/ckpts_final/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
+    ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"    
     print(ckpt_pth)
     checkpoint_callback = ModelCheckpoint(save_top_k=2, monitor="val_loss_accumulated")
     logger = TensorBoardLogger(save_dir=ckpt_pth)
@@ -111,7 +111,9 @@ if __name__ == "__main__":
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
-    save_path = args.save_path
+    #save_path = args.save_path
+    #in modo che salva sulla working directory di kaggle
+    save_path = ckpt_pth
     if args.train:
         trainer.fit(module)
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
