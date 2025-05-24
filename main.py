@@ -95,7 +95,7 @@ if __name__ == "__main__":
                 if f_name and os.path.exists(os.path.join(resume_path, f_name)):
                     resume = os.path.join(resume_path, f_name)
         else:
-            print("⚠️ Nessuna versione precedente trovata, si procede senza resume.")
+            print("⚠️ No resume.")
     
     print(f"RESUME FROM: {resume}")
 
