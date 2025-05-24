@@ -10,9 +10,7 @@ from utils import pad_collate
 from torch.nn.utils.rnn import pad_sequence
 import numpy as np
 
-
 class LaneModule(pl.LightningModule):
-    '''Pytorch lightning module to train angle, distance or multitask procedures'''
     def __init__(self, model, bs, multitask="angle", dataset="comma", time_horizon=1, ground_truth="desired", intervention=False, dataset_path=None, dataset_fraction=1.0):
         super(LaneModule, self).__init__()
         self.dataset_fraction = dataset_fraction
@@ -54,8 +52,8 @@ class LaneModule(pl.LightningModule):
             if loss_angle.isnan() or loss_distance.isnan():
                 print("ERROR")
             loss = loss_angle, loss_distance
-            self.log_dict({"train_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs)
-            self.log_dict({"train_loss_distance": loss_distance}, on_epoch=True, batch_size=self.bs)
+            self.log_dict({"train_loss_angle": loss_angle.detach()}, on_epoch=True, batch_size=self.bs)
+            self.log_dict({"train_loss_distance": loss_distance.detach()}, on_epoch=True, batch_size=self.bs)
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             mask = distance.squeeze() == 0.0
@@ -92,7 +90,7 @@ class LaneModule(pl.LightningModule):
                     else:
                         logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)[:, -1]
                     logits_all.append(logits)
-            return torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]
+            return torch.stack(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]
 
         
         logits, attns = self(image_array, angle, distance, vego)
@@ -117,7 +115,7 @@ class LaneModule(pl.LightningModule):
         if self.time_horizon > 1:
             logits_all = []
             for i in range(self.time_horizon,vego.shape[1], self.time_horizon):
-                for j in range(self.time_horizon)+1:
+                for j in range(self.time_horizon+ 1 ):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
                     if self.multitask == "angle":
                         angle[:,i+j] = logits[:,-1]
@@ -125,13 +123,14 @@ class LaneModule(pl.LightningModule):
                         distance[:,i+j] = input_ids_distance[:,-1]
                     logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)[:, -1]
                     logits_all.append(logits)
-            loss = self.calculate_loss(torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
+            loss = self.calculate_loss(torch.stack(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
             self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs)
             return loss
     
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         logits, attns = self(image_array, angle, distance, vego)
         loss = self.calculate_loss(logits, angle, distance)
+        
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
@@ -140,19 +139,6 @@ class LaneModule(pl.LightningModule):
             self.log_dict({"test_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs)
         self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs)
         return loss
-
-    def training_epoch_end(self, outputs):
-        losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
-        self.log_dict({"train_loss_accumulated": losses }, batch_size=self.bs)
-
-    def validation_epoch_end(self, outputs):
-        losses = torch.mean(torch.stack([x for x in outputs]))
-        self.log_dict({"val_loss_accumulated": losses }, batch_size=self.bs)
-
-    def test_epoch_end(self, outputs):
-        losses = torch.mean(torch.stack([x for x in outputs]))
-        self.log_dict({"test_loss_accumulated": losses }, batch_size=self.bs)
-
     def train_dataloader(self):
         return self.get_dataloader(dataset_type="train")
 
@@ -178,3 +164,5 @@ class LaneModule(pl.LightningModule):
             ds = NUScenesDataset(dataset_type=dataset_type, multitask=self.multitask if not self.intervention else "intervention", ground_truth=self.ground_truth, max_len=20, dataset_path=self.dataset_path, dataset_fraction=self.dataset_fraction)
         return DataLoader(ds, batch_size=self.bs, num_workers=self.num_workers, collate_fn=pad_collate)
         
+
+    

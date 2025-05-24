@@ -16,6 +16,8 @@ def dfs_freeze(model):
         dfs_freeze(child)
 
 ''' This is a modified version of the Longformer model from Huggingface.'''
+
+''' This is a modified version of the Longformer model from Huggingface. '''
 class VTNLongformerModel(LongformerModel):
     def __init__(self,
                  embed_dim=2048,
@@ -44,22 +46,8 @@ class VTNLongformerModel(LongformerModel):
         super(VTNLongformerModel, self).__init__(self.config, add_pooling_layer=False)
         self.embeddings.word_embeddings = None  # to avoid distributed error of unused parameters
 
-'''
-This is a modified version of the pad_to_window_size function from Huggingface.
-It is used to pad the input tensors to a size that is divisible by the attention window size.'''
-def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tensor, position_ids: torch.Tensor,
-                             one_sided_window_size: int, pad_token_id: int):
-    '''A helper function to pad tokens and mask to work with the sliding_chunks implementation of Longformer self-attention.
-    Based on _pad_to_window_size from https://github.com/huggingface/transformers:
-    https://github.com/huggingface/transformers/blob/71bdc076dd4ba2f3264283d4bc8617755206dccd/src/transformers/models/longformer/modeling_longformer.py#L1516
-    Input:
-        input_ids = torch.Tensor(bsz x seqlen): ids of wordpieces
-        attention_mask = torch.Tensor(bsz x seqlen): attention mask
-        one_sided_window_size = int: window size on one side of each token
-        pad_token_id = int: tokenizer.pad_token_id
-    Returns
-        (input_ids, attention_mask) padded to length divisible by 2 * one_sided_window_size
-    '''
+
+def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tensor, position_ids: torch.Tensor, one_sided_window_size: int, pad_token_id: int):
     w = 2 * one_sided_window_size
     seqlen = input_ids.size(1)
     padding_len = (w - seqlen % w) % w
@@ -68,16 +56,8 @@ def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tens
     position_ids = F.pad(position_ids, (1, padding_len), value=False)  # no attention on the padding tokens
     return input_ids, attention_mask, position_ids
 
-''' This is a modified version of the VTN model from Huggingface.
-It is used to build the VTN model.'''
-class VTN(nn.Module):
-    """
-    VTN model builder. It uses ViT-Base or Resnet as the backbone.
-    Daniel Neimark, Omri Bar, Maya Zohar and Dotan Asselmann.
-    "Video Transformer Network."
-    https://arxiv.org/abs/2102.00719
-    """
 
+class VTN(nn.Module):
     def __init__(self, multitask="angle", backbone="resnet", device="cuda", multitask_param=True, concept_features=False, train_concepts=False, return_concepts=False):
         super(VTN, self).__init__()
         self.device = device
@@ -87,7 +67,7 @@ class VTN(nn.Module):
         self._construct_network(multitask, backbone, multitask_param, concept_features)
 
     def _construct_network(self, multitask, backbone, multitask_param, concept_features):
-        clip_model, clip_preprocess = clip.load("ViT-B/32", device=self.device)
+        clip_model, clip_preprocess = clip.load("ViT-B/32", device="cpu")
         self.clip_model = clip_model
         self.clip_preprocess = clip_preprocess
         self.clip_model.eval()
@@ -107,7 +87,7 @@ class VTN(nn.Module):
             resnet = resnet18(weights=ResNet18_Weights.IMAGENET1K_V1)
             self.backbone = torch.nn.Sequential(*list(resnet.children())[:-1])
             embed_dim = 512+additional_feat_size #image feature size + previous sensor feature size 
-            num_attention_heads=5 if not concept_features else 6
+            num_attention_heads=5 #if not concept_features else 6
             mlp_size = 512+additional_feat_size #image feature size + previous sensor feature size 
         elif backbone == "none" and concept_features:
             print("using concept features")
@@ -232,7 +212,8 @@ class VTN(nn.Module):
         x = self.mlp_head(x)
         if self.multitask != "multitask":
             res = x[:,1:F+1,:], attentions
-            return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 
+            return res, attentions # we want to exclude the starting token since we don't have any previous knowledge about it 
         else:
-            res = (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions
-            return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 
+           # res = (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions
+            res = (x[:,1:F+1,:], x2[:,1:F+1,:], self.multitask_param_angle, self.multitask_param_dist)
+            return res, attentions # we want to exclude the starting token since we don't have any previous knowledge about it 
