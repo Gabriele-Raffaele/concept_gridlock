@@ -2,12 +2,11 @@ from torch.nn.utils.rnn import pad_sequence
 import numpy as np 
 import clip
 import random
-p = "/content/concept_gridlock/scenarios/scenarios_small_100.txt"
+p = "/kaggle/input/scenarios/scenarios_small_100.txt"
 with open(p) as file:
     lines = [line.strip() for line in file]
 scenarios = lines
 scenarios_tokens = clip.tokenize(scenarios)
-
 
 #scenarios = random.sample(scenarios, 300)
 #with open("scenarios_small_100.txt", "w") as file:
