@@ -12,7 +12,7 @@ scenarios_tokens = clip.tokenize(scenarios)
 #with open("scenarios_small_100.txt", "w") as file:
 #    for item in scenarios:
 #        file.write(str(item) + "\n")
-scenarios_tokens = clip.tokenize(scenarios)
+#scenarios_tokens = clip.tokenize(scenarios)
 """
     ORIGINAL CODE
     def pad_collate(batch):
