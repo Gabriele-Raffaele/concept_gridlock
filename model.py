@@ -142,7 +142,10 @@ class VTN(nn.Module):
         x = img
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
+            print("img shape", img.shape)
             logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+            print("shape of clip output",logits_per_image.shape, logits_per_text.shape)
+            print("logits_per_image", logits_per_image[0])
             probs = logits_per_image.softmax(dim=-1)
             probs = logits_per_image.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1))
             if not self.train_concepts: probs = probs.detach()
