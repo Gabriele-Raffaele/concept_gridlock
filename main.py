@@ -48,18 +48,7 @@ def get_arg_parser():
 if __name__ == "__main__":
     
 
-    args_list = [
-        '-train',
-        '-task', 'multitask',  # o 'angle'/'distance'
-        '-dataset', 'comma',
-        '-dataset_path', '/kaggle/input/filtered-chunk-hdf5',
-        '-bs', '2',  # Batch 
-        '-max_epochs', '1',
-        '-backbone', 'resnet',
-        '-ground_truth', 'desired',
-        '-concept_features',  
-        '-train_concepts'   
-    ]
+    
     
     parser = get_arg_parser()
     args = parser.parse_args()  # usa davvero gli argomenti da terminale
