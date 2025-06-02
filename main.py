@@ -40,6 +40,7 @@ def get_arg_parser():
     parser.add_argument('-concept_features', action='store_true', help='Use concept features')
     parser.add_argument('-train_concepts', action='store_true', help='Train concept features')
     parser.add_argument('-dataset_fraction', default=1.0, type=float, help='Fraction of dataset to use')
+    parser.add_argument('-n_scenarios', default=100, type=int, help='Number of scenarios/concepts')
     return parser
 if __name__ == "__main__":
     
