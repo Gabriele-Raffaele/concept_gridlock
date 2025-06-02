@@ -14,31 +14,15 @@ import pandas as pd
 import os
 
 def save_preds(logits, target, save_name, p):
-    if isinstance(logits, tuple):
-        logits = logits[0]
-    
-    logits = torch.tensor(logits) if not torch.is_tensor(logits) else logits
-    target = torch.tensor(target) if not torch.is_tensor(target) else target
+    logits = logits.detach().cpu().flatten()
+    target = target.detach().cpu().flatten()
 
-    # Otteniamo dimensioni batch e sequenza dal target
-    b, s = target.shape
-
-    # Flatten logits e target nel caso abbiano più di 2 dimensioni
-    logits = logits.detach().cpu().squeeze()
-    target = target.detach().cpu().squeeze()
-
-    # Se logits è ancora bidimensionale (es. [B, S]), flatteniamo in [B*S]
-    if logits.ndim > 1:
-        logits = logits.reshape(-1)
-    if target.ndim > 1:
-        target = target.reshape(-1)
-
-    # Salviamo
-    df = pd.DataFrame()
-    df['logits'] = logits.tolist()
-    df['target'] = target.tolist()
+    df = pd.DataFrame({
+        'logits': logits.tolist(),
+        'target': target.tolist()
+    })
+    print(f"[DEBUG] logits shape: {logits.shape}, target shape: {target.shape}")
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
-
 
 
 '''Define the argument parser'''
