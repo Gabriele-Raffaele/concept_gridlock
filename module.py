@@ -75,7 +75,7 @@ class LaneModule(pl.LightningModule):
                 logits_tensor = logits
                 target = angle if self.multitask == "angle" else distance
 
-            loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
+            loss = torch.sqrt(self.loss(logits_tensor.squeeze(), target.squeeze(), mask))
 
             return loss
 
