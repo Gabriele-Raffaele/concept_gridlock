@@ -144,18 +144,14 @@ class VTN(nn.Module):
             s = img.shape#[batch_size, seq_len, h,w,c]
             print("img shape", img.shape)
             logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
-            print(f"shape of logits_per_image {logits_per_image.shape} logits per text {logits_per_text.shape}")
+            print("shape of clip output",logits_per_image.shape, logits_per_text.shape)
             print("logits_per_image", logits_per_image[0])
             probs = logits_per_image.softmax(dim=-1)
             print("probs shape", probs.shape)
             print("probs", probs[0])
-
             probs = logits_per_image.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1))
             print("probs reshaped", probs.shape)
             print("probs", probs[0])
-            probs = probs.permute(0, 2, 1) # [batch_size, num_concepts, seq_len]
-            print("probs permuted", probs.shape)
-            print("probs ",probs[0])
             if not self.train_concepts: probs = probs.detach()
 
         angle = torch.roll(angle, shifts=1, dims=1)
