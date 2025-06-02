@@ -58,7 +58,7 @@ if __name__ == "__main__":
     ]
     
     parser = get_arg_parser()
-    args = parser.parse_args(args=args_list)
+    args = parser.parse_args()  # usa davvero gli argomenti da terminale
 
     model = VTN(
         multitask=args.task,
