@@ -221,7 +221,7 @@ class VTN(nn.Module):
             #res = x[:,1:F+1,:], attentions
             #return res, attentions # we want to exclude the starting token since we don't have any previous knowledge about it 
             logits =  x[:,1:F+1,:]
-            return logits
+            return logits, attentions
         else:
            # res = (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions
             res = (x[:,1:F+1,:], x2[:,1:F+1,:], self.multitask_param_angle, self.multitask_param_dist)
