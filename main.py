@@ -32,7 +32,7 @@ def get_arg_parser():
     parser.add_argument('-test', action='store_true')
     parser.add_argument('-gpu_num', default=0, type=int)
     parser.add_argument('-dataset', default='comma', type=str)
-    parser.add_argument('-dataset_path', default='/kaggle/input/filtered-chunk-hdf5', type=str)
+    parser.add_argument('-dataset_path', default='/kaggle/input/filtered-chunk1', type=str)
     parser.add_argument('-bs', default=8, type=int)
     parser.add_argument('-max_epochs', default=10, type=int)
     parser.add_argument('-ground_truth', default='desired', type=str)
@@ -52,7 +52,7 @@ if __name__ == "__main__":
         '-train',
         '-task', 'multitask',  # o 'angle'/'distance'
         '-dataset', 'comma',
-        '-dataset_path', '/kaggle/input/filtered-chunk-hdf5',
+        '-dataset_path', '/kaggle/input/filtered-chunk1',
         '-bs', '2',  # Batch 
         '-max_epochs', '1',
         '-backbone', 'resnet',
