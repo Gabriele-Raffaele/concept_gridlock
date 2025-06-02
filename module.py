@@ -60,7 +60,7 @@ class LaneModule(pl.LightningModule):
             #loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
             #logits_tensor = logits[0] if isinstance(logits, tuple) else logits
             #loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
-            mask = distance.squeeze() == 0.0
+            mask = distance.squeeze(-1) == 0.0
             if isinstance(logits, tuple):
                 if self.multitask == "angle":
                     logits_tensor = logits[0]
@@ -70,12 +70,13 @@ class LaneModule(pl.LightningModule):
                     target = distance
                 else:
                     raise ValueError(f"Unknown task: {self.multitask}")
+                
             else:
                 logits_tensor = logits
                 target = angle if self.multitask == "angle" else distance
 
-            loss = torch.sqrt(self.loss(logits_tensor.squeeze(), target.squeeze(), mask))
-  
+            loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
+
             return loss
 
     def training_step(self, batch, batch_idx):
