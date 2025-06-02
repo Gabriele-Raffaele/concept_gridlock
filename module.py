@@ -57,7 +57,9 @@ class LaneModule(pl.LightningModule):
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             mask = distance.squeeze() == 0.0
-            loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
+            #loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
+            logits_tensor = logits[0] if isinstance(logits, tuple) else logits
+            loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
             return loss
 
     def training_step(self, batch, batch_idx):
