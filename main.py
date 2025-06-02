@@ -17,6 +17,9 @@ import os
 def save_preds(logits, target, save_name, p):
     b, s = target.shape
     df = pd.DataFrame()
+    # aggiunto per evitare errori se logits è una tupla
+    if isinstance(logits, tuple):
+        logits = logits[0]
     df['logits'] = logits.squeeze().reshape(b*s).tolist()
     df['target'] = target.squeeze().reshape(b*s).tolist()
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
