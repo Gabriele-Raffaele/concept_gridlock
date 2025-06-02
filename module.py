@@ -38,10 +38,6 @@ class LaneModule(pl.LightningModule):
         return out.mean() if reduction == "mean" else out 
 
     def calculate_loss(self, logits, angle, distance):
-        print("GUARDA logits:", logits)
-        print("GUARDA:",type(logits), len(logits), logits[0].shape if isinstance(logits, (tuple, list)) else logits.shape)
-        print("GUARDA2:",type(logits), len(logits), logits[1].shape if isinstance(logits, (tuple, list)) else logits.shape)
-
         sm = nn.Softmax(dim=1)
         if self.multitask == "multitask":
             logits_angle, logits_dist, param_angle, param_dist = logits
@@ -61,6 +57,9 @@ class LaneModule(pl.LightningModule):
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             mask = distance.squeeze() == 0.0
+            print("GUARDA:",type(logits), len(logits), logits[0].shape if isinstance(logits, (tuple, list)) else logits.shape)
+            print("GUARDA2:",type(logits), len(logits), logits[1].shape if isinstance(logits, (tuple, list)) else logits.shape)
+
             #loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
             logits_tensor = logits[0] if isinstance(logits, tuple) else logits
             loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
