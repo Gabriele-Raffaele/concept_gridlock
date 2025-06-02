@@ -58,6 +58,7 @@ class LaneModule(pl.LightningModule):
         else:
             mask = distance.squeeze() == 0.0
             #loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
+            print("GUARDA:",type(logits), len(logits), logits[0].shape if isinstance(logits, (tuple, list)) else logits.shape)
             logits_tensor = logits[0] if isinstance(logits, tuple) else logits
             loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
             return loss
