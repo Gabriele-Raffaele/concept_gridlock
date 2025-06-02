@@ -93,73 +93,45 @@ class LaneModule(pl.LightningModule):
         return loss
 
     def predict_step(self, batch, batch_idx):
-        _, image_array, vego, angle, distance, *_ = batch
+        _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
 
         if self.time_horizon > 1:
             logits_all = []
-            target_all = []
-
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
-                    # Estrai sotto-sequenze fino al tempo corrente
                     input_ids_img = image_array[:, 0:i+j, :, :, :]
                     input_ids_vego = vego[:, 0:i+j]
                     input_ids_angle = angle[:, 0:i+j]
                     input_ids_distance = distance[:, 0:i+j]
 
-                    # Multitask
                     if self.multitask == "multitask":
                         logits, _ = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
-                        angle_logit = logits[0][:, -1]
-                        dist_logit = logits[1][:, -1]
-                        logits_all.append((angle_logit, dist_logit))
-
-                        target_all.append((angle[:, i+j], distance[:, i+j]))
-
-                    # Single-task
+                        logits = logits[0][:, -1], logits[1][:, -1]
+                        logits_all.append(logits)
                     else:
                         logits, _ = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
-                        logits = logits[:, -1]  # predizione corrente
-
-                        if self.multitask == "angle":
-                            target = angle[:, i+j]
-                        elif self.multitask == "distance":
-                            target = distance[:, i+j]
-                        else:
-                            raise ValueError(f"Unexpected task: {self.multitask}")
-
+                        logits = logits[:, -1]
                         logits_all.append(logits)
-                        target_all.append(target)
 
             if self.multitask == "multitask":
-                angle_logits, dist_logits = zip(*logits_all)
-                angle_targets, dist_targets = zip(*target_all)
-
-                return (
-                    torch.cat(angle_logits),
-                    torch.cat(angle_targets),
-                    torch.cat(dist_targets),
-                )
+                angle_logits = torch.stack([x[0] for x in logits_all])
+                dist_logits = torch.stack([x[1] for x in logits_all])
+                return (angle_logits.flatten(), dist_logits.flatten()), angle[:, self.time_horizon:].flatten(), distance[:, self.time_horizon:].flatten()
             else:
-                return (
-                    torch.cat(logits_all),
-                    torch.cat(target_all),
-                    torch.zeros_like(target_all),  # dummy per mantenere compatibilità
-                )
+                logits_tensor = torch.stack(logits_all).flatten()
+                if self.multitask == "angle":
+                    return logits_tensor, angle[:, self.time_horizon:].flatten(), torch.zeros_like(angle[:, self.time_horizon:].flatten())
+                else:
+                    return logits_tensor, torch.zeros_like(distance[:, self.time_horizon:].flatten()), distance[:, self.time_horizon:].flatten()
 
-        # Caso time_horizon == 1 (standard forward)
-        logits, _ = self(image_array, angle, distance, vego)
-
-        if self.multitask == "multitask":
-            return logits[0].reshape(-1), angle.reshape(-1), distance.reshape(-1)
         else:
-            if self.multitask == "angle":
-                target = angle
-            elif self.multitask == "distance":
-                target = distance
+            logits, _ = self(image_array, angle, distance, vego)
+            if self.multitask == "multitask":
+                return logits, angle.flatten(), distance.flatten()
+            elif self.multitask == "angle":
+                return logits.flatten(), angle.flatten(), torch.zeros_like(angle.flatten())
             else:
-                raise ValueError(f"Unexpected task: {self.multitask}")
-            return logits.reshape(-1), target.reshape(-1), torch.zeros_like(target)
+                return logits.flatten(), torch.zeros_like(distance.flatten()), distance.flatten()
 
     def validation_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch

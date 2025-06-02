@@ -14,16 +14,19 @@ import pandas as pd
 import os
 
 def save_preds(logits, target, save_name, p):
-    logits = logits.detach().cpu().flatten()
-    target = target.detach().cpu().flatten()
+    if isinstance(logits, tuple):
+        logits = logits[0]  # o [1] se distance
+
+    logits = logits.flatten().tolist()
+    target = target.flatten().tolist()
+
+    assert len(logits) == len(target), f"[ERROR] Lunghezze diverse: logits={len(logits)}, target={len(target)}"
 
     df = pd.DataFrame({
-        'logits': logits.tolist(),
-        'target': target.tolist()
+        'logits': logits,
+        'target': target,
     })
-    print(f"[DEBUG] logits shape: {logits.shape}, target shape: {target.shape}")
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
-
 
 '''Define the argument parser'''
 def get_arg_parser():
@@ -123,31 +126,42 @@ if __name__ == "__main__":
     best_ckpt = checkpoint_callback.best_model_path
     preds = trainer.predict(module, ckpt_path=best_ckpt if best_ckpt else "best")
 
-    for (logits, angle_gt, dist_gt) in preds:
-       if args.task != "multitask":
-        if isinstance(logits, tuple):
-            if args.task == "angle":
-                logits = logits[0]
-            elif args.task == "distance":
-                logits = logits[1]
-            else:
-                raise ValueError(f"Task '{args.task}' not recognised as single-task mode.")
-        
-        save_preds(
-            logits, angle_gt if args.task == "angle" else dist_gt,
-            f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}",
-            save_path
-        )
+    if args.task != "multitask":
+        for (logits, angle_gt, dist_gt) in preds:
+            if isinstance(logits, tuple):
+                if args.task == "angle":
+                    logits = logits[0]
+                elif args.task == "distance":
+                    logits = logits[1]
+                else:
+                    raise ValueError(f"Task '{args.task}' not recognised as single-task mode.")
+
+            save_preds(
+                logits, angle_gt if args.task == "angle" else dist_gt,
+                f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}",
+                save_path
+            )
     else:
-        angle_preds, dist_preds = logits[0], logits[1]
+        # NB: fuori dal for, aggrega tutti i batch in multitask
+        all_angle_preds = []
+        all_dist_preds = []
+        all_angle_gt = []
+        all_dist_gt = []
+
+        for (logits, angle_gt, dist_gt) in preds:
+            angle_preds, dist_preds = logits[0], logits[1]
+            all_angle_preds.append(angle_preds)
+            all_dist_preds.append(dist_preds)
+            all_angle_gt.append(angle_gt)
+            all_dist_gt.append(dist_gt)
 
         save_preds(
-            angle_preds, angle_gt,
+            torch.cat(all_angle_preds), torch.cat(all_angle_gt),
             f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}",
             save_path
         )
         save_preds(
-            dist_preds, dist_gt,
+            torch.cat(all_dist_preds), torch.cat(all_dist_gt),
             f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}",
             save_path
         )
