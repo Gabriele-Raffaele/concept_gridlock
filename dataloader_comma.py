@@ -14,7 +14,7 @@ class CommaDataset(Dataset):
         multitask="angle",
         ground_truth="desired",
         return_full=False, 
-        dataset_path ="/kaggle/input/filtered-chunk1" ,
+        dataset_path ="/kaggle/input/filtered-chunk-hdf5" ,
         dataset_fraction=1.0
     ):
         assert dataset_type in ["train", "val", "test"]
