@@ -123,26 +123,32 @@ if __name__ == "__main__":
     preds = trainer.predict(module, ckpt_path=best_ckpt if best_ckpt else "best")
 
     for (logits, angle_gt, dist_gt) in preds:
-        if args.task != "multitask":
-            # single-task
-            save_preds(
-                logits, angle_gt,
-                f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}",
-                save_path
-            )
-        else:
-            # estrai solo i primi due (angle_preds, dist_preds)
-            angle_preds, dist_preds = logits[0], logits[1]
+       if args.task != "multitask":
+        if isinstance(logits, tuple):
+            if args.task == "angle":
+                logits = logits[0]
+            elif args.task == "distance":
+                logits = logits[1]
+            else:
+                raise ValueError(f"Task '{args.task}' not recognised as single-task mode.")
+        
+        save_preds(
+            logits, angle_gt if args.task == "angle" else dist_gt,
+            f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}",
+            save_path
+        )
+    else:
+        angle_preds, dist_preds = logits[0], logits[1]
 
-            save_preds(
-                angle_preds, angle_gt,
-                f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}",
-                save_path
-            )
-            save_preds(
-                dist_preds, dist_gt,
-                f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}",
-                save_path
-            )
+        save_preds(
+            angle_preds, angle_gt,
+            f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}",
+            save_path
+        )
+        save_preds(
+            dist_preds, dist_gt,
+            f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}",
+            save_path
+        )
 
     print(f"Prediction completate, CSV salvati in: {save_path}")
