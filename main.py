@@ -36,7 +36,7 @@ def get_arg_parser():
     parser.add_argument('-new_version', action='store_true')
     parser.add_argument('-intervention_prediction', action='store_true')
     parser.add_argument('-dev_run', action='store_true')
-    parser.add_argument('-backbone', default='resnet', type=str, choices=['resnet', 'vit'], help='Backbone model type')
+    parser.add_argument('-backbone', default='resnet', type=str, choices=['resnet', 'vit', 'none'], help='Backbone model type')
     parser.add_argument('-concept_features', action='store_true', help='Use concept features')
     parser.add_argument('-train_concepts', action='store_true', help='Train concept features')
     parser.add_argument('-dataset_fraction', default=1.0, type=float, help='Fraction of dataset to use')
