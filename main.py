@@ -17,9 +17,6 @@ import os
 def save_preds(logits, target, save_name, p):
     b, s = target.shape
     df = pd.DataFrame()
-    # aggiunto per evitare errori se logits è una tupla
-    if isinstance(logits, tuple):
-        logits = logits[0]
     df['logits'] = logits.squeeze().reshape(b*s).tolist()
     df['target'] = target.squeeze().reshape(b*s).tolist()
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
@@ -27,9 +24,9 @@ def save_preds(logits, target, save_name, p):
 '''Define the argument parser'''
 def get_arg_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-task', default='angle', type=str)
-    parser.add_argument('-train', action='store_true')
-    parser.add_argument('-test', action='store_true')
+    parser.add_argument('-task', default='multitask', type=str)
+    parser.add_argument('-train', action=argparse.BooleanOptionalAction)
+    parser.add_argument('-test', action=argparse.BooleanOptionalAction)
     parser.add_argument('-gpu_num', default=0, type=int)
     parser.add_argument('-dataset', default='comma', type=str)
     parser.add_argument('-dataset_path', default='/kaggle/input/filtered-chunk-hdf5', type=str)

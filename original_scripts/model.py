@@ -15,7 +15,6 @@ def dfs_freeze(model):
             param.requires_grad = False
         dfs_freeze(child)
 
-''' This is a modified version of the Longformer model from Huggingface.'''
 class VTNLongformerModel(LongformerModel):
     def __init__(self,
                  embed_dim=2048,
@@ -44,9 +43,7 @@ class VTNLongformerModel(LongformerModel):
         super(VTNLongformerModel, self).__init__(self.config, add_pooling_layer=False)
         self.embeddings.word_embeddings = None  # to avoid distributed error of unused parameters
 
-'''
-This is a modified version of the pad_to_window_size function from Huggingface.
-It is used to pad the input tensors to a size that is divisible by the attention window size.'''
+
 def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tensor, position_ids: torch.Tensor,
                              one_sided_window_size: int, pad_token_id: int):
     '''A helper function to pad tokens and mask to work with the sliding_chunks implementation of Longformer self-attention.
@@ -68,8 +65,7 @@ def pad_to_window_size_local(input_ids: torch.Tensor, attention_mask: torch.Tens
     position_ids = F.pad(position_ids, (1, padding_len), value=False)  # no attention on the padding tokens
     return input_ids, attention_mask, position_ids
 
-''' This is a modified version of the VTN model from Huggingface.
-It is used to build the VTN model.'''
+
 class VTN(nn.Module):
     """
     VTN model builder. It uses ViT-Base or Resnet as the backbone.
@@ -77,16 +73,17 @@ class VTN(nn.Module):
     "Video Transformer Network."
     https://arxiv.org/abs/2102.00719
     """
-
-    def __init__(self, multitask="angle", backbone="resnet", device="cuda", multitask_param=True, concept_features=False, train_concepts=False, return_concepts=False):
+# qui peppe ha tolto cuda:2 per mettere cuda
+    def __init__(self, multitask="angle", backbone="resnet", device="cuda:2", multitask_param=True, concept_features=False, train_conepts=False, return_concepts=False):
         super(VTN, self).__init__()
         self.device = device
         self.return_concepts = return_concepts
-        self.train_concepts = train_concepts
+        self.train_concepts = train_conepts
     
         self._construct_network(multitask, backbone, multitask_param, concept_features)
 
     def _construct_network(self, multitask, backbone, multitask_param, concept_features):
+        # in device peppe ha messo cpu.. perchè?
         clip_model, clip_preprocess = clip.load("ViT-B/32", device=self.device)
         self.clip_model = clip_model
         self.clip_preprocess = clip_preprocess
@@ -232,7 +229,10 @@ class VTN(nn.Module):
         x = self.mlp_head(x)
         if self.multitask != "multitask":
             res = x[:,1:F+1,:], attentions
+            #nel return peppe ha messo attentions, ma non è chiaro perchè
             return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 
         else:
+            #qui invece attensions non c'è da peppe 
             res = (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions
+            #anche qui peppe ha messo attentions, ma non è chiaro perchè
             return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 

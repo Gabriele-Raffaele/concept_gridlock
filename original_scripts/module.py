@@ -59,7 +59,13 @@ class LaneModule(pl.LightningModule):
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             mask = distance.squeeze() == 0.0
+            #da peppe questa sotto è commentata 
             loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
+            #e lui ha insierito questo:
+            #----------------------------------------------
+            #logits_tensor = logits[0] if isinstance(logits, tuple) else logits
+            #loss = torch.sqrt(self.loss(logits_tensor.squeeze(), angle.squeeze(), mask))
+            #----------------------------------------------
             return loss
 
     def training_step(self, batch, batch_idx):
@@ -140,7 +146,8 @@ class LaneModule(pl.LightningModule):
             self.log_dict({"test_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs)
         self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs)
         return loss
-
+    #------------------------------------------------------------
+    #Questi metodi non si sa perchè da peppe non ci sono, boh capire perchè
     def training_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
         self.log_dict({"train_loss_accumulated": losses }, batch_size=self.bs)
@@ -152,7 +159,7 @@ class LaneModule(pl.LightningModule):
     def test_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x for x in outputs]))
         self.log_dict({"test_loss_accumulated": losses }, batch_size=self.bs)
-
+    #------------------------------------------------------------
     def train_dataloader(self):
         return self.get_dataloader(dataset_type="train")
 
