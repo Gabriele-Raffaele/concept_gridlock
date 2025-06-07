@@ -105,7 +105,7 @@ if __name__ == "__main__":
         os.makedirs(path)
     vs = os.listdir(path)
     filt = []
-    '''
+    
     f_name, resume_path = 'None', 'None'
     if not args.new_version and not args.test:
         for elem1 in vs: 
@@ -129,30 +129,6 @@ if __name__ == "__main__":
         else:
             print("⚠️ No previous versions found — skipping resume.")
             resume_path, f_name = None, None
-    '''
-    f_name, resume_path = None, None
-
-    if not args.new_version and not args.test:
-        vs = os.listdir(ckpt_pth + "/lightning_logs/") if os.path.exists(ckpt_pth + "/lightning_logs/") else []
-        filt = [v for v in vs if "version" in v]
-
-        if filt:
-            versions = sorted([int(v.split("_")[-1]) for v in filt])
-            version = f"version_{versions[-1]}"
-            resume_path = f"{ckpt_pth}/lightning_logs/{version}/checkpoints"
-            if os.path.exists(resume_path):
-                files = os.listdir(resume_path)
-                print(files)
-                for f in files:
-                    if "ckpt" in f:
-                        f_name = f
-                        break
-            else:
-                print(f"⚠️ No checkpoint directory found at {resume_path}")
-                resume_path = None
-                f_name = None
-        else:
-            print("⚠️ No versions found under lightning_logs")
     #ho leggermente modificato questa parte per evitare errori in caso di resum_path che f_name None -G.R.
     # original code: resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
     resume = None if (args.new_version or args.test or f_name is None or resume_path is None) else resume_path + f_name
