@@ -53,11 +53,12 @@ if __name__ == "__main__":
         torch.set_float32_matmul_precision('high')
     
     
-
+    
     parser = get_arg_parser()
     args = parser.parse_args()
     task = args.task
-   
+    #print per debugging
+    print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}")
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
                                         min_delta=0.05, 
                                         patience=5, 
