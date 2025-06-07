@@ -97,7 +97,8 @@ if __name__ == "__main__":
                                         monitor="val_loss_accumulated")
     
     logger = TensorBoardLogger(save_dir=ckpt_pth)
-
+#------------------------------------------------------------
+    # Tutta questa parte da peppe non c'è
     path = ckpt_pth + "/lightning_logs/" 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -108,23 +109,28 @@ if __name__ == "__main__":
         for elem1 in vs: 
             if 'version' in elem1:
                 filt.append(elem1)
-        versions =[elem.split("_")[-1]for elem in filt]
-        versions = sorted(versions)
-        version = f"version_{versions[-1]}"
-        resume_path = path + version + "/checkpoints/"
-        files = os.listdir(resume_path)
-        print(files)
-        for f in files: 
-            if "ckpt" in f:
-                f_name = f
-                break
-            else: 
-                f_name = None
-        print(f_name)
+        #Ho aggiunto l'if filt -G.R.
+        if filt: 
+            versions =[elem.split("_")[-1]for elem in filt]
+            versions = sorted(versions)
+            version = f"version_{versions[-1]}"
+            resume_path = path + version + "/checkpoints/"
+            files = os.listdir(resume_path)
+            print(files)
+            for f in files: 
+                if "ckpt" in f:
+                    f_name = f
+                    break
+                else: 
+                    f_name = None
+            print(f_name)
+        else:
+            print("⚠️ No previous versions found — skipping resume.")
+            resume_path, f_name = None, None
     resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
     print(f"RESUME FROM: {resume}")
 
-
+#------------------------------------------------------------
     trainer = pl.Trainer(
         fast_dev_run=args.dev_run,
         #gpus=2, (peppe)
