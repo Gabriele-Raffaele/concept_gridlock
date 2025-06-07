@@ -139,7 +139,9 @@ if __name__ == "__main__":
         accelerator='gpu',
         devices= 1 if torch.cuda.is_available() else None, 
         logger=logger,
-        resume_from_checkpoint= resume, 
+        #resume_from_checkpoint= resume, #Commentato perchè resume_from_checkpoint 
+        # è stato deprecato in PyTorch Lightning. Nelle versioni recenti, non devi 
+        # più passarlo nel costruttore del Trainer, ma solo nel metodo fit(). - G.R.
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
@@ -147,7 +149,7 @@ if __name__ == "__main__":
         )
     save_path = args.save_path
     if args.train:
-        trainer.fit(module)
+        trainer.fit(module, ckpt_path=resume ) # ho aggiunto il resume qui, originalmente era nel trainer. original code: trainer.fit(module) - G.R.
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
         print(f'saving hparams at {save_path}')
         with open(f'{save_path}/hparams.yaml', 'w') as f:
