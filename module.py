@@ -148,6 +148,8 @@ class LaneModule(pl.LightningModule):
         return loss
     #------------------------------------------------------------
     #Questi metodi non si sa perchè da peppe non ci sono, boh capire perchè
+    #penso che siano deprecati, ma non sono sicuro, in ogni caso non sono utilizzati
+    '''
     def training_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
         self.log_dict({"train_loss_accumulated": losses }, batch_size=self.bs)
@@ -159,6 +161,7 @@ class LaneModule(pl.LightningModule):
     def test_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x for x in outputs]))
         self.log_dict({"test_loss_accumulated": losses }, batch_size=self.bs)
+    '''
     #------------------------------------------------------------
     def train_dataloader(self):
         return self.get_dataloader(dataset_type="train")
