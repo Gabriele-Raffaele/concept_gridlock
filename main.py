@@ -127,7 +127,9 @@ if __name__ == "__main__":
         else:
             print("⚠️ No previous versions found — skipping resume.")
             resume_path, f_name = None, None
-    resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
+    #ho leggermente modificato questa parte per evitare errori in caso di resum_path che f_name None -G.R.
+    # original code: resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
+    resume = None if (args.new_version or args.test or f_name is None or resume_path is None) else resume_path + f_name
     print(f"RESUME FROM: {resume}")
 
 #------------------------------------------------------------
