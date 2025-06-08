@@ -154,11 +154,11 @@ class LaneModule(pl.LightningModule):
     #penso che siano deprecati, ma non sono sicuro, in ogni caso non sono utilizzati
     #credo che pytorch-lightning abbia moodificato questi hooks
     
-    def on_trai_epoch_end(self, outputs):
+    def on_train_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
         self.log_dict({"train_loss_accumulated": losses }, batch_size=self.bs)
 
-    def validation_epoch_end(self, outputs):
+    def on_validation_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x for x in outputs]))
         self.log_dict({"val_loss_accumulated": losses }, batch_size=self.bs)
 
