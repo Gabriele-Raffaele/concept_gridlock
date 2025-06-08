@@ -42,7 +42,9 @@ class LaneModule(pl.LightningModule):
     def calculate_loss(self, logits, angle, distance):
         sm = nn.Softmax(dim=1)
         if self.multitask == "multitask":
-            logits_angle, logits_dist, param_angle, param_dist = logits
+            #ho messo logits[0] perchè il forward restituisce una tupla 
+            # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
+            logits_angle, logits_dist, param_angle, param_dist = logits[0]
             mask = distance.squeeze() == 0.0
             if not self.intervention:
                 loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask))
@@ -106,7 +108,8 @@ class LaneModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        logits, attns = self(image_array, angle, distance, vego)
+        #ho cambiato da logits,atts a logits, probs, ma tanto non cambia nulla -G.R.
+        logits, probs = self(image_array, angle, distance, vego)
         loss = self.calculate_loss(logits, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
