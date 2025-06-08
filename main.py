@@ -12,7 +12,7 @@ from  pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 from pathlib import Path
 import pandas as pd 
 import os
-
+#function to save predictions
 def save_preds(logits, target, save_name, p):
     b, s = target.shape
     df = pd.DataFrame()
@@ -59,13 +59,14 @@ if __name__ == "__main__":
     task = args.task
     #print per debugging
     print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}")
+    #EarlyStopping: stop training when val_loss_accumulated does not improve
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
                                         min_delta=0.05, 
                                         patience=5, 
                                         verbose=False, 
                                         mode="max")
-    #capire come impostare più gpu
-  
+    
+    #capire come impostare più gpu - G.R.
     model = VTN(multitask=task, 
                 backbone=args.backbone, 
                 concept_features=args.concept_features, 
@@ -81,6 +82,7 @@ if __name__ == "__main__":
         model.to(device)
         (peppe )
     '''
+    #Wrapper that links the model to data, loss and optimizer
     module = LaneModule(model, 
                         multitask=task, 
                         dataset = args.dataset, 
@@ -89,7 +91,7 @@ if __name__ == "__main__":
                         intervention=args.intervention_prediction, 
                         dataset_path=args.dataset_path, 
                         dataset_fraction=args.dataset_fraction)
-
+    #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
     ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
     checkpoint_callback = ModelCheckpoint( save_top_k=2, 
                                           #dirpath=ckpt_pth, (peppe)
@@ -99,6 +101,7 @@ if __name__ == "__main__":
     
     logger = TensorBoardLogger(save_dir=ckpt_pth)
 #------------------------------------------------------------
+    # Check if the checkpoint path exists, then it sets its for resuming training.
     # Tutta questa parte da peppe non c'è
     path = ckpt_pth + "/lightning_logs/" 
     if not os.path.exists(path):
@@ -135,6 +138,7 @@ if __name__ == "__main__":
     print(f"RESUME FROM: {resume}")
 
 #------------------------------------------------------------
+    #training setup
     trainer = pl.Trainer(
         fast_dev_run=args.dev_run,
         #gpus=2, (peppe)
@@ -150,12 +154,16 @@ if __name__ == "__main__":
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
     save_path = args.save_path
+    #start training and saves args in a yaml file
     if args.train:
         trainer.fit(module, ckpt_path=resume ) # ho aggiunto il resume qui, originalmente era nel trainer. original code: trainer.fit(module) - G.R.
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
         print(f'saving hparams at {save_path}')
         with open(f'{save_path}/hparams.yaml', 'w') as f:
             yaml.dump(args, f)
+
+
+    #Use the specified checkpoint to do predictions         
     ckpt_path=args.checkpoint_path
     p = "/".join(ckpt_path.split("/")[:-2])
     #preds = trainer.test(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
