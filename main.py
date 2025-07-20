@@ -142,7 +142,7 @@ if __name__ == "__main__":
     #training setup
     trainer = pl.Trainer(
         fast_dev_run=args.dev_run,
-        #gpus=2, (peppe)
+        #gpus=2,
         accelerator='gpu',
         devices= 1 if torch.cuda.is_available() else None, 
         logger=logger,
@@ -156,7 +156,7 @@ if __name__ == "__main__":
     save_path = args.save_path
     #start training and saves args in a yaml file
     if args.train:
-        trainer.fit(module, ckpt_path=resume ) # ho aggiunto il resume qui, originalmente era nel trainer. original code: trainer.fit(module) - G.R.
+        trainer.fit(module) # ho aggiunto il resume qui, originalmente era nel trainer. original code: trainer.fit(module) - G.R.
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
         print(f'saving hparams at {save_path}')
         with open(f'{save_path}/hparams.yaml', 'w') as f:
