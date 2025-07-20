@@ -42,7 +42,7 @@ class LaneModule(pl.LightningModule):
     def calculate_loss(self, logits, angle, distance):
         sm = nn.Softmax(dim=1)
         if self.multitask == "multitask":
-            #ho messo logits[0] perchè il forward restituisce una tupla 
+            #ho messo logits[0] perchè il forward restituisce una tupla, prima era logits
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
             logits_angle, logits_dist, param_angle, param_dist = logits[0]
             mask = distance.squeeze() == 0.0
@@ -150,12 +150,8 @@ class LaneModule(pl.LightningModule):
         self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs)
         return loss
     #------------------------------------------------------------
-    #Questi metodi non si sa perchè da peppe non ci sono, boh capire perchè
-    #penso che siano deprecati, ma non sono sicuro, in ogni caso non sono utilizzati
-    #credo che pytorch-lightning abbia moodificato questi hooks, infatti adesso gli ho cambiato
-    #nomi, aggiumngeno on_, ma vanno modificati
+    #Questi metodi non si sa perchè da peppe non ci sono, boh capire perchè - G.R.
 
-    
     def train_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
         self.log_dict({"train_loss_accumulated": losses }, batch_size=self.bs)
