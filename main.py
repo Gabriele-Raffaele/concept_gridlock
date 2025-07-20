@@ -20,6 +20,7 @@ def save_preds(logits, target, save_name, p):
     df['logits'] = logits.squeeze().reshape(b*s).tolist()
     df['target'] = target.squeeze().reshape(b*s).tolist()
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
+    print(f"Saved predictions to {p}/{save_name}.csv")
 
 def get_arg_parser():
     parser = argparse.ArgumentParser()
