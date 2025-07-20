@@ -232,7 +232,7 @@ class VTN(nn.Module):
             #nel return peppe ha messo attentions, ma non è chiaro perchè
             return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 
         else:
-            
+            print("sono nel multitask")
             #qui invece attensions non c'è da peppe 
             res = (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions
             #anche qui peppe ha messo attentions, ma non è chiaro perchè
