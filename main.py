@@ -177,7 +177,9 @@ if __name__ == "__main__":
             predictions, preds_1, preds_2 = pred[0], pred[1], pred[2] 
             save_preds(predictions, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
         else:
-            preds, angle, dist = pred[0], pred[1], pred[2]
-            preds_angle, preds_dist = preds[0], preds[1]
-            save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
-            save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
+            (preds_tuple, attentions), probs = pred
+            logits_angle, logits_dist, _, _ = preds_tuple
+
+            # Salva logits_angle e logits_dist (qui senza target)
+            save_preds(logits_angle, logits_angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
+            save_preds(logits_dist, logits_dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
