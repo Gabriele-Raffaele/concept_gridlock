@@ -152,6 +152,7 @@ if __name__ == "__main__":
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
+        log_every_n_steps=10,
         )
     save_path = args.save_path
     #start training and saves args in a yaml file
