@@ -156,15 +156,15 @@ class LaneModule(pl.LightningModule):
     #nomi, aggiumngeno on_, ma vanno modificati
 
     
-    def on_train_epoch_end(self, outputs):
+    def train_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
         self.log_dict({"train_loss_accumulated": losses }, batch_size=self.bs)
 
-    def on_validation_epoch_end(self, outputs):
+    def validation_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x for x in outputs]))
         self.log_dict({"val_loss_accumulated": losses }, batch_size=self.bs)
 
-    def on_test_epoch_end(self, outputs):
+    def test_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x for x in outputs]))
         self.log_dict({"test_loss_accumulated": losses }, batch_size=self.bs)
     
