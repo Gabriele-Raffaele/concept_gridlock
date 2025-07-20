@@ -177,8 +177,7 @@ if __name__ == "__main__":
             predictions, preds_1, preds_2 = pred[0], pred[1], pred[2] 
             save_preds(predictions, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
         else:
-            (res, attentions, probs) = pred 
-            (logits_angle, logits_dist) = res
-            print(f"Logits angle shape: {logits_angle.shape}, Logits dist shape: {logits_dist.shape}")
-            save_preds(logits_angle, logits_angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
-            save_preds(logits_dist, logits_dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
+            res, angle, dist = pred[0], pred[1], pred[2]
+            (preds_angle, preds_dist, param_angle, param_dist), attention = res
+            save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
+            save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)

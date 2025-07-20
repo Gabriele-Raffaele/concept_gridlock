@@ -86,6 +86,7 @@ class LaneModule(pl.LightningModule):
     def predict_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         if self.time_horizon > 1:
+
             logits_all = []
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
@@ -103,8 +104,8 @@ class LaneModule(pl.LightningModule):
             return torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]
 
         
-        logits, attns = self(image_array, angle, distance, vego)
-        return logits, angle, distance
+        res, probs = self(image_array, angle, distance, vego)
+        return res, angle, distance
 
     def validation_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
