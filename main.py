@@ -1,3 +1,4 @@
+#requires pytorch_lightning==1.9.4
 import pytorch_lightning as pl
 from model import *
 from module import * 
@@ -145,9 +146,7 @@ if __name__ == "__main__":
         accelerator='gpu',
         devices= 1 if torch.cuda.is_available() else None, 
         logger=logger,
-        #resume_from_checkpoint= resume, #Commentato perchè resume_from_checkpoint 
-        # è stato deprecato in PyTorch Lightning. Nelle versioni recenti, non devi 
-        # più passarlo nel costruttore del Trainer, ma solo nel metodo fit(). - G.R.
+        resume_from_checkpoint= resume,
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
