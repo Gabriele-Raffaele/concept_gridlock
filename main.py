@@ -180,5 +180,5 @@ if __name__ == "__main__":
         else:
             res, angle, dist = pred[0], pred[1], pred[2]
             (preds_angle, preds_dist, param_angle, param_dist), attention = res
-            save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
-            save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", save_path)
+            save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "kaggle/working")
+            save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "kaggle/working")
