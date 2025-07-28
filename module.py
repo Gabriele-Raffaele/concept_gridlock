@@ -66,6 +66,7 @@ class LaneModule(pl.LightningModule):
         else:
             target = angle if self.multitask == "angle" else distance
             mask = distance.squeeze() == 0.0
+            logits = logits[0] if isinstance(logits, tuple) else logits
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
             #e lui ha insierito questo:
             #----------------------------------------------
