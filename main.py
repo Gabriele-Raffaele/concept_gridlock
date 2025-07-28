@@ -175,8 +175,13 @@ if __name__ == "__main__":
     #TODO: Considerare solo il multitask
     for pred in preds:
         if args.task != "multitask":
-            predictions, preds_1, preds_2 = pred[0], pred[1], pred[2] 
-            save_preds(predictions, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
+            res, preds_1, preds_2 = pred[0], pred[1], pred[2]
+            prediction, attention = res
+            if args.task == "angle":
+                save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
+            else:
+                save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
+
         else:
             res, angle, dist = pred[0], pred[1], pred[2]
             (preds_angle, preds_dist, param_angle, param_dist), attention = res

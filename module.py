@@ -46,6 +46,10 @@ class LaneModule(pl.LightningModule):
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
             logits_angle, logits_dist, param_angle, param_dist = logits[0]
             mask = distance.squeeze() == 0.0
+            #TODO: The intervention Boolean flag indicates whether 
+            # a special type of supervision is being used in which:
+            # • Instead of predicting the actual steering angle,
+            # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
             if not self.intervention:
                 loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask))
             else: 
@@ -60,9 +64,9 @@ class LaneModule(pl.LightningModule):
             self.log_dict({"train_loss_distance": loss_distance}, on_epoch=True, batch_size=self.bs)
             return loss_angle, loss_distance, param_angle, param_dist
         else:
+            target = angle if self.multitask == "angle" else distance
             mask = distance.squeeze() == 0.0
-            #da peppe questa sotto è commentata 
-            loss = torch.sqrt(self.loss(logits.squeeze(), angle.squeeze(), mask))
+            loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
             #e lui ha insierito questo:
             #----------------------------------------------
             #logits_tensor = logits[0] if isinstance(logits, tuple) else logits
@@ -85,6 +89,10 @@ class LaneModule(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
+       #TODO: time_horizon is an integer parameter that indicates how often the model 
+       # should make a prediction during inference or testing. It is used to simulate 
+       # a sequential prediction over time, as if the vehicle were proceeding into the 
+       # future, prediction after prediction, using previous outputs as inputs.
         if self.time_horizon > 1:
 
             logits_all = []
