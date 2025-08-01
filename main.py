@@ -75,16 +75,7 @@ def main():
                 concept_features=args.concept_features, 
                 device = f"cuda:{args.gpu_num}", 
                 train_concepts=args.train_concepts)
-    
-    ''' if torch.cuda.is_available() and torch.cuda.device_count() > 1:
-        device = torch.device("cuda")
-        model = DataParallel(model, device_ids=[0,1])  # scegli 0,1,2… in base alle GPU
-        model.to(device)
-    else:
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        model.to(device)
-        (peppe )
-    '''
+
     #Wrapper that links the model to data, loss and optimizer
     module = LaneModule(model, 
                         multitask=task, 
@@ -146,8 +137,8 @@ def main():
         fast_dev_run=args.dev_run,
         #gpus=2,
         accelerator='gpu',
-        devices= 2 if torch.cuda.is_available() else None, 
-         strategy="ddp",
+        devices=[args.gpu_num] if torch.cuda.is_available() else None,  
+        strategy="ddp",
         logger=logger,
         resume_from_checkpoint= resume,
         max_epochs=args.max_epochs,

@@ -74,7 +74,7 @@ class VTN(nn.Module):
     https://arxiv.org/abs/2102.00719
     """
 # qui peppe ha tolto cuda:2 per mettere cuda
-    def __init__(self, multitask="multitask", backbone="none", device="cuda:2", multitask_param=True, concept_features=True, train_concepts=True, return_concepts=True):
+    def __init__(self, multitask="multitask", backbone="none", device="cuda:1", multitask_param=True, concept_features=True, train_concepts=True, return_concepts=True):
         super(VTN, self).__init__()
         self.device = device
         self.return_concepts = return_concepts
@@ -83,7 +83,6 @@ class VTN(nn.Module):
         self._construct_network(multitask, backbone, multitask_param, concept_features)
 
     def _construct_network(self, multitask, backbone, multitask_param, concept_features):
-        # in device peppe ha messo cpu.. perchè?
         clip_model, clip_preprocess = clip.load("ViT-B/32", device=self.device)
         self.clip_model = clip_model
         self.clip_preprocess = clip_preprocess
