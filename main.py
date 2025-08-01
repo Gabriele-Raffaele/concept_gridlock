@@ -54,9 +54,16 @@ def main():
     if torch.cuda.device_count() > 0 and torch.cuda.get_device_capability()[0] >= 7:
         # Set the float32 matrix multiplication precision to 'high'
         torch.set_float32_matmul_precision('high')
-    
-    
-    
+    '''
+    if torch.cuda.is_available() and torch.cuda.device_count() > 1:
+        device = torch.device("cuda")
+        model = DataParallel(model, device_ids=[0,1])  # scegli 0,1,2… in base alle GPU
+        model.to(device)
+    else:
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        model.to(device)
+    '''
+
     parser = get_arg_parser()
     args = parser.parse_args()
     task = args.task

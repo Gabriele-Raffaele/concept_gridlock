@@ -15,7 +15,7 @@ def mse_loss(input, target, mask, reduction="mean"):
         out = (input[~mask]-target[~mask])**2
         return out.mean() if reduction == "mean" else out 
 
-p_concept_large = '/data1/shared/jessica/data1/data/toyota/ckpts/ckpts_desiredcomma_distance/lightning_logs/version_36/distance.csv'
+p_concept_large = '/kaggle/input/results/comma_angle_none_True_100.csv'
 df = pd.read_csv(p_concept_large, header=None)
 df.columns = ['preds', 'targets']
 
