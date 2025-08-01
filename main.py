@@ -46,7 +46,8 @@ def get_arg_parser():
     parser.add_argument('-checkpoint_path', default='', type=str)
     return parser
 
-if __name__ == "__main__":
+
+def main():    
     torch.cuda.empty_cache()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:50"
 
@@ -145,7 +146,8 @@ if __name__ == "__main__":
         fast_dev_run=args.dev_run,
         #gpus=2,
         accelerator='gpu',
-        devices= 1 if torch.cuda.is_available() else None, 
+        devices= 2 if torch.cuda.is_available() else None, 
+         strategy="ddp",
         logger=logger,
         resume_from_checkpoint= resume,
         max_epochs=args.max_epochs,
@@ -187,3 +189,5 @@ if __name__ == "__main__":
             (preds_angle, preds_dist, param_angle, param_dist), attention = res
             save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
             save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
+if __name__ == "__main__":
+    main()
