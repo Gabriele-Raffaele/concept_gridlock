@@ -180,9 +180,9 @@ def main():
             res, preds_1, preds_2 = pred[0], pred[1], pred[2]
             prediction, attention = res
             if args.task == "angle":
-                save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
+                save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
             else:
-                save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", save_path)
+                save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
 
         else:
             res, angle, dist = pred[0], pred[1], pred[2]
