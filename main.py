@@ -137,7 +137,7 @@ def main():
         fast_dev_run=args.dev_run,
         #gpus=2,
         accelerator='gpu',
-        devices=[args.gpu_num] if torch.cuda.is_available() else None,  
+        devices=2 if torch.cuda.is_available() else None,  
         strategy="ddp",
         logger=logger,
         resume_from_checkpoint= resume,
