@@ -32,7 +32,6 @@ class CommaDataset(Dataset):
         self.return_full = return_full
         self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         self.resize = transforms.Resize((224,224))
-        #/data1/shared/jessica/data1/data/
         data_path = f"{dataset_path}/filtered_chunk1_{dataset_type}.hdf5" if ground_truth == "regular" else f"{dataset_path}/filtered_chunk1_{dataset_type}.hdf5"
         self.people_seqs = []
         self.h5_file = h5py.File(data_path, "r")
