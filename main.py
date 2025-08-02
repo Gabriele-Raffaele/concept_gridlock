@@ -175,7 +175,7 @@ def main():
     #Use the specified checkpoint to do predictions         
     #p = "/".join(ckpt_path.split("/")[:-2])
     if args.test:
-        print(checkpoint_callback.best_model_path)
+        print(f"Using checkpoint: {checkpoint_callback.best_model_path}")
         ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
         if not os.path.exists(ckpt_path):
             raise FileNotFoundError(f"Checkpoint file not found: {ckpt_path}")
