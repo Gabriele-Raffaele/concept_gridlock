@@ -95,6 +95,7 @@ def main():
     #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
     ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
     checkpoint_callback = ModelCheckpoint(save_top_k=2, 
+                                        dirpath=ckpt_pth + "/lightning_logs/" + f"version_{args.n_scenarios}" +"/checkpoints",
                                             monitor="val_loss_accumulated")
     
     logger = TensorBoardLogger(save_dir=ckpt_pth)
