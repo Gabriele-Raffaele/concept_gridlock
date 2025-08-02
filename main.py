@@ -39,7 +39,7 @@ def get_arg_parser():
     parser.add_argument('-concept_features', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-new_version', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-intervention_prediction', action=argparse.BooleanOptionalAction) 
-    parser.add_argument('-save_path', default="", type=str) 
+    parser.add_argument('-save_path', default="/kaggle/working/", type=str) 
     parser.add_argument('-max_epochs', default=1, type=int) 
     parser.add_argument('-bs', default=1, type=int) 
     parser.add_argument('-ground_truth', default="normal", type=str) 
@@ -94,16 +94,16 @@ def main():
                         dataset_fraction=args.dataset_fraction)
     #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
     ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
+    path = ckpt_pth + "/lightning_logs/" 
+    if not os.path.exists(path):
+        os.makedirs(path)
     checkpoint_callback = ModelCheckpoint(save_top_k=2, 
-                                        dirpath=ckpt_pth + "/lightning_logs/" + f"version_{args.n_scenarios}" +"/checkpoints",
+                                        
                                             monitor="val_loss_accumulated")
     
     logger = TensorBoardLogger(save_dir=ckpt_pth)
 #------------------------------------------------------------
-    # Check if the checkpoint path exists, then it sets its for resuming training.
-    path = ckpt_pth + "/lightning_logs/" 
-    if not os.path.exists(path):
-        os.makedirs(path)
+   
     vs = os.listdir(path)
     filt = []
     
@@ -162,10 +162,10 @@ def main():
         log_every_n_steps=1,
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
-    save_path = args.save_path
+    #save_path = args.save_path
     #start training and saves args in a yaml file
     if args.train:
-        trainer.fit(module) # ho aggiunto il resume qui, originalmente era nel trainer. original code: trainer.fit(module) - G.R.
+        trainer.fit(module)
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
         print(f'saving hparams at {save_path}')
         with open(f'{save_path}/hparams.yaml', 'w') as f:
@@ -173,28 +173,32 @@ def main():
 
 
     #Use the specified checkpoint to do predictions         
-    ckpt_path=args.checkpoint_path
-    p = "/".join(ckpt_path.split("/")[:-2])
-    test_results = test_trainer.test(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
-    
-    with open(f"{ckpt_path}/test_metrics.json", "w") as f:
-        json.dump(test_results, f, indent=4)
+    #p = "/".join(ckpt_path.split("/")[:-2])
+    if args.test:
+        ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
+        if not os.path.exists(ckpt_path):
+            raise FileNotFoundError(f"Checkpoint file not found: {ckpt_path}")
+        print(f"Using checkpoint: {ckpt_path}")
+        test_results = test_trainer.test(module, ckpt_path=ckpt_path)
+        result_dir = os.path.dirname(ckpt_path)
+        with open(f"{result_dir}/test_metrics.json", "w") as f:
+            json.dump(test_results, f, indent=4)
 
-    preds = trainer.predict(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
-    #save_path =  "."
-    for pred in preds:
-        if args.task != "multitask":
-            res, preds_1, preds_2 = pred[0], pred[1], pred[2]
-            prediction, attention = res
-            if args.task == "angle":
-                save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
+        preds = trainer.predict(module, ckpt_path=ckpt_path)
+        #save_path =  "."
+        for pred in preds:
+            if args.task != "multitask":
+                res, preds_1, preds_2 = pred[0], pred[1], pred[2]
+                prediction, attention = res
+                if args.task == "angle":
+                    save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
+                else:
+                    save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
+
             else:
-                save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
-
-        else:
-            res, angle, dist = pred[0], pred[1], pred[2]
-            (preds_angle, preds_dist, param_angle, param_dist), attention = res
-            save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
-            save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
+                res, angle, dist = pred[0], pred[1], pred[2]
+                (preds_angle, preds_dist, param_angle, param_dist), attention = res
+                save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
+                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
 if __name__ == "__main__":
     main()
