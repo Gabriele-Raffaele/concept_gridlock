@@ -13,6 +13,7 @@ from  pytorch_lightning.loggers.tensorboard import TensorBoardLogger
 from pathlib import Path
 import pandas as pd 
 import os
+import json
 #function to save predictions
 def save_preds(logits, target, save_name, p):
     b, s = target.shape
@@ -67,7 +68,6 @@ def main():
     parser = get_arg_parser()
     args = parser.parse_args()
     task = args.task
-    #print per debugging
     print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}")
     #EarlyStopping: stop training when val_loss_accumulated does not improve
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
@@ -76,7 +76,7 @@ def main():
                                         verbose=False, 
                                         mode="max")
     
-    #capire come impostare più gpu - G.R.
+    
     model = VTN(multitask=task, 
                 backbone=args.backbone, 
                 concept_features=args.concept_features, 
@@ -94,16 +94,15 @@ def main():
                         dataset_fraction=args.dataset_fraction)
     #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
     ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
-    checkpoint_callback = ModelCheckpoint( save_top_k=2, 
-                                          #dirpath=ckpt_pth, (peppe)
-                                           #filename='best-{epoch}-{val_loss:.2f}', (peppe)
+    checkpoint_callback = ModelCheckpoint(save_top_k=2, 
+                                            dirpath=ckpt_pth,
+                                            filename='best-{epoch}-{val_loss:.2f}',
                                            #mode="min", (peppe)
-                                        monitor="val_loss_accumulated")
+                                            monitor="val_loss_accumulated")
     
     logger = TensorBoardLogger(save_dir=ckpt_pth)
 #------------------------------------------------------------
     # Check if the checkpoint path exists, then it sets its for resuming training.
-    # Tutta questa parte da peppe non c'è
     path = ckpt_pth + "/lightning_logs/" 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -115,7 +114,6 @@ def main():
         for elem1 in vs: 
             if 'version' in elem1:
                 filt.append(elem1)
-        #Ho aggiunto l'if filt -G.R.
         if filt: 
             versions =[elem.split("_")[-1]for elem in filt]
             versions = sorted(versions)
@@ -133,7 +131,6 @@ def main():
         else:
             print("⚠️ No previous versions found — skipping resume.")
             resume_path, f_name = None, None
-    #ho leggermente modificato questa parte per evitare errori in caso di resum_path che f_name None -G.R.
     # original code: resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
     resume = None if (args.new_version or args.test or f_name is None or resume_path is None) else resume_path + f_name
     print(f"RESUME FROM: {resume}")
@@ -152,7 +149,6 @@ def main():
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
-        log_every_n_steps=10,
         )
     save_path = args.save_path
     #start training and saves args in a yaml file
@@ -167,12 +163,13 @@ def main():
     #Use the specified checkpoint to do predictions         
     ckpt_path=args.checkpoint_path
     p = "/".join(ckpt_path.split("/")[:-2])
-    #preds = trainer.test(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
-    #best_ckpt = checkpoint_callback.best_model_path (peppe)
-    # ???
+    test_results = trainer.test(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
+    
+    with open(f"{ckpt_path}/test_metrics.json", "w") as f:
+        json.dump(test_results, f, indent=4)
+        
     preds = trainer.predict(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
     #save_path =  "."
-    #TODO: Considerare solo il multitask
     for pred in preds:
         if args.task != "multitask":
             res, preds_1, preds_2 = pred[0], pred[1], pred[2]

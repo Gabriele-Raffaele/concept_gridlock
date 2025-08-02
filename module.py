@@ -136,7 +136,7 @@ class LaneModule(pl.LightningModule):
         if self.time_horizon > 1:
             logits_all = []
             for i in range(self.time_horizon,vego.shape[1], self.time_horizon):
-                for j in range(self.time_horizon)+1:
+                for j in range(self.time_horizon+1):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
                     if self.multitask == "angle":
                         angle[:,i+j] = logits[:,-1]
@@ -160,7 +160,6 @@ class LaneModule(pl.LightningModule):
         self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs)
         return loss
     #------------------------------------------------------------
-    #Questi metodi non si sa perchè da peppe non ci sono, boh capire perchè - G.R.
 
     def train_epoch_end(self, outputs):
         losses = torch.mean(torch.stack([x['loss'] for x in outputs]))
