@@ -148,6 +148,7 @@ def main():
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
+        log_every_n_steps=1,
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
     save_path = args.save_path
@@ -167,7 +168,7 @@ def main():
     
     with open(f"{ckpt_path}/test_metrics.json", "w") as f:
         json.dump(test_results, f, indent=4)
-        
+
     preds = trainer.predict(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
     #save_path =  "."
     for pred in preds:
