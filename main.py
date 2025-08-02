@@ -48,7 +48,8 @@ def get_arg_parser():
     return parser
 
 
-def main():    
+#def main():    
+if __name__ == "__main__":
     torch.cuda.empty_cache()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:50"
 
@@ -198,5 +199,5 @@ def main():
             (preds_angle, preds_dist, param_angle, param_dist), attention = res
             save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
             save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
-if __name__ == "__main__":
-    main()
+#if __name__ == "__main__":
+#    main()
