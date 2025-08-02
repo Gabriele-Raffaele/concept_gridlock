@@ -48,8 +48,7 @@ def get_arg_parser():
     return parser
 
 
-#def main():    
-if __name__ == "__main__":
+def main():    
     torch.cuda.empty_cache()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:50"
 
@@ -143,7 +142,7 @@ if __name__ == "__main__":
         #gpus=2,
         accelerator='gpu',
         devices=2 if torch.cuda.is_available() else None,  
-        #strategy="ddp",
+        strategy="ddp",
         logger=logger,
         resume_from_checkpoint= resume,
         max_epochs=args.max_epochs,
@@ -199,5 +198,5 @@ if __name__ == "__main__":
             (preds_angle, preds_dist, param_angle, param_dist), attention = res
             save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
             save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
-#if __name__ == "__main__":
-#    main()
+if __name__ == "__main__":
+    main()
