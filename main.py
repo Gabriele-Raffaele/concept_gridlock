@@ -154,6 +154,7 @@ def main():
         #gpus=2,
         accelerator='gpu',
         devices=1 if torch.cuda.is_available() else None,  
+        strategy="auto",    
         logger=logger,
         resume_from_checkpoint= resume,
         max_epochs=args.max_epochs,
@@ -185,7 +186,7 @@ def main():
         with open(f"{result_dir}/test_metrics.json", "w") as f:
             json.dump(test_results, f, indent=4)
 
-        preds = trainer.predict(module, ckpt_path=ckpt_path)
+        preds = test_trainer.predict(module, ckpt_path=ckpt_path)
         #save_path =  "."
         for pred in preds:
             if args.task != "multitask":
