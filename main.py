@@ -151,6 +151,19 @@ def main():
         log_every_n_steps=1,
         #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
+    test_trainer = pl.Trainer(
+        fast_dev_run=args.dev_run,
+        #gpus=2,
+        accelerator='gpu',
+        devices=2 if torch.cuda.is_available() else None,  
+        logger=logger,
+        resume_from_checkpoint= resume,
+        max_epochs=args.max_epochs,
+        default_root_dir=ckpt_pth ,
+        callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
+        log_every_n_steps=1,
+        #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
+        )
     save_path = args.save_path
     #start training and saves args in a yaml file
     if args.train:
@@ -164,7 +177,7 @@ def main():
     #Use the specified checkpoint to do predictions         
     ckpt_path=args.checkpoint_path
     p = "/".join(ckpt_path.split("/")[:-2])
-    test_results = trainer.test(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
+    test_results = test_trainer.test(module, ckpt_path=ckpt_path if ckpt_path != '' else "best")
     
     with open(f"{ckpt_path}/test_metrics.json", "w") as f:
         json.dump(test_results, f, indent=4)
