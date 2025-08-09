@@ -88,7 +88,7 @@ def get_regular_ckpt_from_lightning_checkpoint(state_dict):
 
 commda_ds = CommaDataset(dataset_type="test",
         multitask=multitask,
-        ground_truth="normal", dataset_path='/data1/jessica/data/toyota/', return_full=True)
+        ground_truth="normal", dataset_path='/kaggle/input/filtered-chunk-hdf5', return_full=True)
 #nuscenes_ds = NUScenesDataset(dataset_type="test",
 #        multitask=multitask, max_len=20,
 #        ground_truth="normal", dataset_path='/data1/jessica/data/toyota/')

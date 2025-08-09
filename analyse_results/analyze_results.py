@@ -11,7 +11,7 @@ from PIL import Image
 from collections import Counter
 import warnings 
 import glob
-from vis_utils import * 
+from vis_utils import get_regular_ckpt_from_lightning_checkpoint
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
