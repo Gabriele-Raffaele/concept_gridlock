@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from PIL import Image
 from collections import Counter
 import warnings 
+import glob
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
@@ -36,9 +37,22 @@ commda_ds = CommaDataset(dataset_type="test",
 dataloader_comma = DataLoader(commda_ds, batch_size=1, shuffle=False, num_workers=0, collate_fn=pad_collate)
 
 model = VTN(multitask=multitask, backbone=backbone, concept_features=concept_features, device = f"cuda:{gpu_num}", return_concepts=True)
-checkpoint_path_distance = '/data1/jessica/data/toyota/ckpts_final/ckpts_final_comma_distance_none/lightning_logs/version_0/checkpoints/epoch=50-step=3162.ckpt'
-checkpoint_path_angle = '/data1/jessica/data/toyota/ckpts_final/ckpts_final_nuscenes_distance_none/lightning_logs/version_10/checkpoints/epoch=519-step=14560.ckpt'
-checkpoint_path = checkpoint_path_distance
+
+#Build checkpoint path -G.R.
+ckpt_root = f"/kaggle/working/ckpts_final_comma_distance_none_True_1"
+#find the latest version -G.R.
+versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
+if not versions:
+    raise FileNotFoundError("None found")
+latest_version = max(versions, key=os.path.getmtime)
+
+# Find checkpoints in the latest version -G.R.
+ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
+if not ckpt_files:
+    raise FileNotFoundError("None found.")
+checkpoint_path = max(ckpt_files, key=os.path.getmtime)
+
+print(f"Using checkpoint: {checkpoint_path}")
 
 ckpt = torch.load(checkpoint_path)
 state_dict = ckpt['state_dict']
