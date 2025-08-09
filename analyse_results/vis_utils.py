@@ -4,7 +4,7 @@ import torch
 import numpy as np
 from torch.utils.data import Dataset, DataLoader
 import sys
-sys.path.append("..")
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils import pad_collate
 from dataloader_comma import CommaDataset
 from dataloader_nuscenes import NUScenesDataset
