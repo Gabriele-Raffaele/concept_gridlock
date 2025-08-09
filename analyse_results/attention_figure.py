@@ -79,14 +79,15 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     (logits, attns), concepts = model(img, angle, distance, vego)
     top5_indices = torch.tensor(concepts.squeeze()).topk(10).indices
     s = img.shape
-    angle, distance, vego, logits, concepts = angle.to("cpu"), distance.to("cpu"), vego.to("cpu"), logits.detach().cpu().to("cpu"), concepts.detach().cpu().to("cpu")
-    
+    angle, distance, vego, logits, concepts = angle.to("cpu"), distance.to("cpu"), vego.to("cpu"), logits.detach().cpu().to("cpu"), concepts.detach().cpu().to("cpu") 
+
     f = []
     inter = []
     for i, elem0 in enumerate(top5_indices):
         inter = []
         for elem in top5_indices[max(i-20, 0):min(i+20,len(top5_indices))]:
             l = elem.cpu().numpy().tolist()
+            #TODO: why does it remove 131 and 55 -G.R.
             if 131 in l:
                 l.remove(131)
             if 55 in l:
@@ -151,4 +152,4 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     frames[0].save(output_path("gif"), format='GIF', append_images=frames[1:], save_all=True,
                 duration=frame_duration, loop=0)
     imageio.mimsave(output_path("mp4"), frames, fps=4)
- 
+    break
