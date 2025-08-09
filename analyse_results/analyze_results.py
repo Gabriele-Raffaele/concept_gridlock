@@ -57,5 +57,5 @@ print(f"Using checkpoint: {checkpoint_path}")
 ckpt = torch.load(checkpoint_path)
 state_dict = ckpt['state_dict']
 #added this to load the model correctly -G.R.
-model.load_state_dict(state_dict, strict=False)
+model.load_state_dict(state_dict)
 print('done')
