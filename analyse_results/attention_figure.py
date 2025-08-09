@@ -119,13 +119,13 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
         axes.spines['left'].set_visible(False)
         axes.spines['right'].set_visible(False)
 
-        plt.savefig(f"/home/jessica/personalized_driving_toyota/result_images/mturk/{i}.png")
+        plt.savefig(f"/kaggle/working/result_images/{i}.png")
 
-    
-    image_directory = '/home/jessica/personalized_driving_toyota/result_images/mturk/'
+
+    image_directory = '/kaggle/working/result_images/'
 
     # Set the output GIF file path
-    output_path = lambda x: f'/home/jessica/personalized_driving_toyota/result_images/mturk/att/attention_comma_{j}.{x}'
+    output_path = lambda x: f'/kaggle/working/result_images/att/attention_comma_{j}.{x}'
 
     # Set the duration (in milliseconds) for each frame in the GIF
     frame_duration = 700
@@ -148,5 +148,4 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     frames[0].save(output_path("gif"), format='GIF', append_images=frames[1:], save_all=True,
                 duration=frame_duration, loop=0)
     imageio.mimsave(output_path("mp4"), frames, fps=4)
-    break
-    if j > 50: break
+ 
