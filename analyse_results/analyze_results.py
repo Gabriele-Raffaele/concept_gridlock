@@ -11,6 +11,7 @@ from PIL import Image
 from collections import Counter
 import warnings 
 import glob
+from vis_utils import * 
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 
@@ -56,6 +57,9 @@ print(f"Using checkpoint: {checkpoint_path}")
 
 ckpt = torch.load(checkpoint_path)
 state_dict = ckpt['state_dict']
+state_dict = get_regular_ckpt_from_lightning_checkpoint(state_dict)
 #added this to load the model correctly -G.R.
-model.load_state_dict(state_dict, strict=False)
+model.load_state_dict(state_dict)
 print('done')
+
+#what this module does it loads a pre-trained model and prepares it for evaluation on a test dataset -G.R.

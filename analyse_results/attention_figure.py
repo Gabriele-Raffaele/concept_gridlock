@@ -24,7 +24,24 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", category=UserWarning, module="matplotlib")
 print('1')
+#Build checkpoint path -G.R.
+ckpt_root = f"/kaggle/working/ckpts_final_comma_distance_none_True_1"
+#find the latest version -G.R.
+versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
+if not versions:
+    raise FileNotFoundError("None found")
+latest_version = max(versions, key=os.path.getmtime)
+
+# Find checkpoints in the latest version -G.R.
+ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
+if not ckpt_files:
+    raise FileNotFoundError("None found.")
+checkpoint_path = max(ckpt_files, key=os.path.getmtime)
+
+print(f"Using checkpoint: {checkpoint_path}")
+
 ckpt = torch.load(checkpoint_path)
+
 print('2')
 state_dict = ckpt['state_dict']
 state_dict = get_regular_ckpt_from_lightning_checkpoint(state_dict)
