@@ -33,7 +33,7 @@ nuscenes_ds = NUScenesDataset(dataset_type="test",
 
 commda_ds = CommaDataset(dataset_type="test",
         multitask=multitask,
-        ground_truth="normal", dataset_path='"/kaggle/input/filtered-chunk-hdf5"')
+        ground_truth="normal", dataset_path='/kaggle/input/filtered-chunk-hdf5')
 dataloader_comma = DataLoader(commda_ds, batch_size=1, shuffle=False, num_workers=0, collate_fn=pad_collate)
 
 model = VTN(multitask=multitask, backbone=backbone, concept_features=concept_features, device = f"cuda:{gpu_num}", return_concepts=True)
