@@ -50,6 +50,8 @@ model.load_state_dict(state_dict)
 model.eval()
 model = model.to(gpu)
 print('3')
+output_dir = "/kaggle/working/result_images/att"
+os.makedirs(output_dir, exist_ok=True)
 
 def split_string(string):
     words = string.replace("a photo of driving on a highway with", "").replace("a photo of", "").replace("driving on a highway", "").replace("past", "").replace("a street with", "").split()  # Split the string into a list of words
