@@ -2,6 +2,7 @@ import pandas as pd
 import numpy
 import torch 
 import numpy as np
+import os
 from torch.utils.data import Dataset, DataLoader
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -13,7 +14,7 @@ from model import VTN
 import matplotlib.pyplot as plt 
 from PIL import Image
 import glob
-import os
+
 from utils import * 
 import re
 gpu_num = 1
