@@ -105,7 +105,8 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     fig, axes = plt.subplots(1, 1, figsize=(12, 16))#,gridspec_kw= {'height_ratios': [20, 1]})
 
     plt_idx = 0
-    for i, image in tqdm(enumerate(img[0][10:120])):
+    for i, image in tqdm(enumerate(img[0][10:239:10])):
+        
     
         image_frame = (image).cpu().permute(1, 2, 0)#unorm(image).cpu().permute(1, 2, 0)
 
