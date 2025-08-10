@@ -75,6 +75,11 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     image_array,  vego, angle, distance, g, s, l = batch
     print(image_array.shape,  vego.shape, angle.shape, distance.shape)
     img = image_array
+    # riduci i frame in input al modello
+    img = img[:, 10:239:10]  # riduci i frame in input al modello
+    angle = angle[:, 10:239:10]
+    distance = distance[:, 10:239:10]
+    vego = vego[:, 10:239:10]
     max_len = 240 #never used -G.R.
     img, angle, distance, vego = img.to(gpu), angle.to(gpu), distance.to(gpu), vego.to(gpu)
     (logits, attns), concepts = model(img, angle, distance, vego)
@@ -105,7 +110,7 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     fig, axes = plt.subplots(1, 1, figsize=(12, 16))#,gridspec_kw= {'height_ratios': [20, 1]})
 
     plt_idx = 0
-    for i, image in tqdm(enumerate(img[0][10:239:10])):
+    for i, image in tqdm(enumerate(img[0])):
 
     
         image_frame = (image).cpu().permute(1, 2, 0)#unorm(image).cpu().permute(1, 2, 0)
