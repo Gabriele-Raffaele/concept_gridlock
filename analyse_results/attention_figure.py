@@ -69,7 +69,8 @@ def split_string(string):
         result.append(current_line.strip())
     
     return "\n".join(result)
-
+print (f"Dimension of dataloader_comma: {len(dataloader_comma.dataset)} ")
+print(f"Number of batches: {len(dataloader_comma)}")
 for j, batch in tqdm(enumerate(dataloader_comma)):
     image_array,  vego, angle, distance, g, s, l = batch
     print(image_array.shape,  vego.shape, angle.shape, distance.shape)
