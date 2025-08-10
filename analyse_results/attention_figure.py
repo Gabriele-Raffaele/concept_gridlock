@@ -74,7 +74,7 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     image_array,  vego, angle, distance, g, s, l = batch
     print(image_array.shape,  vego.shape, angle.shape, distance.shape)
     img = image_array
-    max_len = 240
+    max_len = 240 #never used -G.R.
     img, angle, distance, vego = img.to(gpu), angle.to(gpu), distance.to(gpu), vego.to(gpu)
     (logits, attns), concepts = model(img, angle, distance, vego)
     top5_indices = torch.tensor(concepts.squeeze()).topk(10).indices
