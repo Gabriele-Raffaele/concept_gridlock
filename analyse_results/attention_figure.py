@@ -106,7 +106,7 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
 
     plt_idx = 0
     for i, image in tqdm(enumerate(img[0][10:239:10])):
-        
+
     
         image_frame = (image).cpu().permute(1, 2, 0)#unorm(image).cpu().permute(1, 2, 0)
 
@@ -154,4 +154,4 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     frames[0].save(output_path("gif"), format='GIF', append_images=frames[1:], save_all=True,
                 duration=frame_duration, loop=0)
     imageio.mimsave(output_path("mp4"), frames, fps=4)
-    break
+    
