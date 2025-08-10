@@ -69,14 +69,24 @@ def split_string(string):
         result.append(current_line.strip())
     
     return "\n".join(result)
+
+commda_ds = CommaDataset(dataset_type="test",
+        multitask=multitask,
+        ground_truth="normal", dataset_path='/kaggle/input/filtered-chunk-hdf5', return_full=True)
+#nuscenes_ds = NUScenesDataset(dataset_type="test",
+#        multitask=multitask, max_len=20,
+#        ground_truth="normal", dataset_path='/data1/jessica/data/toyota/')
+dataloader_comma = DataLoader(commda_ds, batch_size=1, shuffle=False, num_workers=0)
+#dataloader_nuscenes = DataLoader(nuscenes_ds, batch_size=1, shuffle=True, num_workers=0, collate_fn=pad_collate)
+
 print (f"Dimension of dataloader_comma: {len(dataloader_comma.dataset)} ")
 print(f"Number of batches: {len(dataloader_comma)}")
 for j, batch in tqdm(enumerate(dataloader_comma)):
     image_array,  vego, angle, distance, g, s, l = batch
     print(image_array.shape,  vego.shape, angle.shape, distance.shape)
     img = image_array
-    # riduci i frame in input al modello
-    img = img[:, 10:239:10]  # riduci i frame in input al modello
+    # reduce the number of frames to 24, as the model expects 24 frames -G.R.
+    img = img[:, 10:239:10]
     angle = angle[:, 10:239:10]
     distance = distance[:, 10:239:10]
     vego = vego[:, 10:239:10]
