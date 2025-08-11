@@ -81,6 +81,7 @@ class LaneModule(pl.LightningModule):
         loss = self.calculate_loss(logits, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
+            #0.3 and 0.7 hyperparameters used to give more importance to distance prediction than angle prediction -G.R.
             param_angle, param_dist = 0.3, 0.7
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
@@ -118,7 +119,6 @@ class LaneModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        #ho cambiato da logits,atts a logits, probs, ma tanto non cambia nulla -G.R.
         logits, probs = self(image_array, angle, distance, vego)
         loss = self.calculate_loss(logits, angle, distance)
         if self.multitask == "multitask":

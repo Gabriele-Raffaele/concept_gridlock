@@ -146,9 +146,8 @@ def main():
         resume_from_checkpoint= resume,
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
-        callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
+        callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback, early_stop_callback],
         log_every_n_steps=1,
-        #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
     test_trainer = pl.Trainer(
         fast_dev_run=args.dev_run,
@@ -162,7 +161,6 @@ def main():
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
         log_every_n_steps=1,
-        #, EarlyStopping(monitor="train_loss", mode="min")],#in case we want early stopping
         )
     #save_path = args.save_path
     #start training and saves args in a yaml file

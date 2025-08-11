@@ -92,6 +92,7 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
     vego = vego[:, 10:239:10]
     max_len = 240 #never used -G.R.
     img, angle, distance, vego = img.to(gpu), angle.to(gpu), distance.to(gpu), vego.to(gpu)
+    #inference on test set, the model was setted in evaluation mode, so dropout and batch normalization layers behave differently -G.R.
     (logits, attns), concepts = model(img, angle, distance, vego)
     top5_indices = torch.tensor(concepts.squeeze()).topk(10).indices
     s = img.shape
