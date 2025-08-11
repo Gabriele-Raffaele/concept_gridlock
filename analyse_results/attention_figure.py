@@ -140,7 +140,7 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
         axes.spines['left'].set_visible(False)
         axes.spines['right'].set_visible(False)
 
-        plt.savefig(f"/kaggle/working/result_images/{i}.png")
+        plt.savefig(f"/kaggle/working/result_images/{j}_{i}.png")
 
 
     image_directory = '/kaggle/working/result_images/'
