@@ -135,14 +135,18 @@ class LaneModule(pl.LightningModule):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         if self.time_horizon > 1:
             logits_all = []
-            for i in range(self.time_horizon,vego.shape[1], self.time_horizon):
-                for j in range(self.time_horizon+1):
+            for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
+                for j in range(self.time_horizon):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
-                    if self.multitask == "angle":
-                        angle[:,i+j] = logits[:,-1]
-                    if self.multitask == "distance":
-                        distance[:,i+j] = input_ids_distance[:,-1]
-                    logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)[:, -1]
+                    if self.multitask == "angle" and len(logits_all) > 0:
+                        angle[:,i+j] = torch.tensor(logits_all)[-1]
+                    if self.multitask == "distance" and len(logits_all) > 0:
+                        distance[:,i+j] = torch.tensor(logits_all)[-1]
+                    if self.multitask == "multitask":
+                        logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        logits = logits[0][:, -1], logits[1][:, -1]
+                    else:
+                        logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)[:, -1]
                     logits_all.append(logits)
             loss = self.calculate_loss(torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
             self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
