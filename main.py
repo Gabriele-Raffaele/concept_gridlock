@@ -188,7 +188,7 @@ def main():
         # Find checkpoints in the latest version -G.R.
         ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
         if not ckpt_files:
-            raise FileNotFoundError(f"Checkpoint file not found: {ckpt_files}")
+            raise FileNotFoundError(f"Checkpoint file not found")
         ckpt_path = max(ckpt_files, key=os.path.getmtime)
         print(f"Using checkpoint: {ckpt_path}")
         test_results = test_trainer.test(module, ckpt_path=ckpt_path)
