@@ -112,7 +112,7 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits = logits[:, -1]
                     logits_all.append(logits)
-                    logits_all = torch.stack(logits_all, dim=1)
+            logits_all = torch.stack(logits_all, dim=1)
 
             return logits_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:]
 
