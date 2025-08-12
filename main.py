@@ -109,7 +109,8 @@ def main():
     filt = []
     
     f_name, resume_path = 'None', 'None'
-    if not args.new_version or not args.test:
+    if not args.new_version and not args.test:
+        
         for elem1 in vs: 
             if 'version' in elem1:
                 filt.append(elem1)
@@ -178,18 +179,21 @@ def main():
         #if train and test are not computed together then checkpoint_callback.best_model_path will not be set because the model was not trained
         #ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
         #Build checkpoint path -G.R.
-        ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
-         #find the latest version -G.R.
-        versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
-        if not versions:
-            raise FileNotFoundError("None found")
-        latest_version = max(versions, key=os.path.getmtime)
+        if args.checkpoint_path == '':
+            ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
+            #find the latest version -G.R.
+            versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
+            if not versions:
+                raise FileNotFoundError("None found")
+            latest_version = max(versions, key=os.path.getmtime)
 
-        # Find checkpoints in the latest version -G.R.
-        ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
-        if not ckpt_files:
-            raise FileNotFoundError(f"Checkpoint file not found")
-        ckpt_path = max(ckpt_files, key=os.path.getmtime)
+            # Find checkpoints in the latest version -G.R.
+            ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
+            if not ckpt_files:
+                raise FileNotFoundError(f"Checkpoint file not found")
+            ckpt_path = max(ckpt_files, key=os.path.getmtime)
+        else:
+            ckpt_path = args.checkpoint_path
         print(f"Using checkpoint: {ckpt_path}")
         test_results = test_trainer.test(module, ckpt_path=ckpt_path)
         result_dir = os.path.dirname(ckpt_path)
