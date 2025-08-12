@@ -151,7 +151,8 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits = logits[:, -1]
                     logits_all.append(logits)
-            loss = self.calculate_loss(torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
+            logits_all = torch.stack(logits_all, dim=1)
+            loss = self.calculate_loss(logits_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:])
             self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             return loss
     
