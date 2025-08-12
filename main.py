@@ -109,7 +109,7 @@ def main():
     filt = []
     
     f_name, resume_path = 'None', 'None'
-    if not args.new_version and not args.test:
+    if not args.new_version or not args.test:
         for elem1 in vs: 
             if 'version' in elem1:
                 filt.append(elem1)
