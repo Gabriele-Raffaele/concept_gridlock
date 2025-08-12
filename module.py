@@ -96,20 +96,20 @@ class LaneModule(pl.LightningModule):
        # a sequential prediction over time, as if the vehicle were proceeding into the 
        # future, prediction after prediction, using previous outputs as inputs.
         if self.time_horizon > 1:
-
             logits_all = []
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
                     if self.multitask == "angle" and len(logits_all) > 0:
-                        angle[:,i+j] = torch.tensor(logits_all)[-1]
+                        angle[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "distance" and len(logits_all) > 0:
-                        distance[:,i+j] = torch.tensor(logits_all)[-1]
+                        distance[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "multitask":
-                        logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        logits, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits = logits[0][:, -1], logits[1][:, -1]
                     else:
-                        logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        logits, attns = res
                         logits = logits[:, -1]
                     logits_all.append(logits)
             return torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]
