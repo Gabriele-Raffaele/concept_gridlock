@@ -13,7 +13,7 @@ import numpy as np
 
 class LaneModule(pl.LightningModule):
     '''Pytorch lightning module to train angle, distance or multitask procedures'''
-    def __init__(self, model, bs, multitask="multitask", dataset="comma", time_horizon=3, ground_truth="normal", intervention=False, dataset_path=None, dataset_fraction=1.0):
+    def __init__(self, model, bs, multitask="multitask", dataset="comma", time_horizon=2, ground_truth="normal", intervention=False, dataset_path=None, dataset_fraction=1.0):
         super(LaneModule, self).__init__()
         self.dataset_fraction = dataset_fraction
         self.model = model
