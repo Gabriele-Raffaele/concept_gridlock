@@ -109,7 +109,7 @@ class LaneModule(pl.LightningModule):
                         logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits = logits[0][:, -1], logits[1][:, -1]
                     else:
-                        logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)[:, -1]
+                        logits, attns = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits = logits[:, -1]
                     logits_all.append(logits)
             return torch.tensor(logits_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]
