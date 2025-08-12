@@ -140,9 +140,9 @@ class LaneModule(pl.LightningModule):
                 for j in range(self.time_horizon):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
                     if self.multitask == "angle" and len(logits_all) > 0:
-                        angle[:,i+j] = torch.tensor(logits_all)[-1]
+                        angle[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "distance" and len(logits_all) > 0:
-                        distance[:,i+j] = torch.tensor(logits_all)[-1]
+                        distance[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "multitask":
                         logits, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits = logits[0][:, -1], logits[1][:, -1]
@@ -205,4 +205,3 @@ class LaneModule(pl.LightningModule):
         elif self.dataset == 'nuscenes':
             ds = NUScenesDataset(dataset_type=dataset_type, multitask=self.multitask if not self.intervention else "intervention", ground_truth=self.ground_truth, max_len=20, dataset_path=self.dataset_path, dataset_fraction=self.dataset_fraction)
         return DataLoader(ds, batch_size=self.bs, num_workers=self.num_workers, collate_fn=pad_collate)
-        

@@ -117,7 +117,7 @@ def main():
 
     logger = TensorBoardLogger(save_dir=ckpt_pth, version=version)
 
-    # Imposta la variabile resume in base alla versione trovata
+   
     if version is not None:
         resume_path = os.path.join(path, f"version_{version}", "checkpoints")
         if os.path.exists(resume_path):
@@ -142,7 +142,7 @@ def main():
         devices=2 if torch.cuda.is_available() else None,  
         strategy="ddp",
         logger=logger,
-        resume_from_checkpoint= resume,
+      
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback, early_stop_callback],
@@ -155,7 +155,7 @@ def main():
         devices=1 if torch.cuda.is_available() else None,  
         strategy="auto",    
         logger=logger,
-        resume_from_checkpoint= resume,
+        
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
@@ -164,7 +164,7 @@ def main():
     #save_path = args.save_path
     #start training and saves args in a yaml file
     if args.train:
-        trainer.fit(module)
+        trainer.fit(module, ckpt_path=resume)
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
         print(f'saving hparams at {save_path}')
         with open(f'{save_path}/hparams.yaml', 'w') as f:
