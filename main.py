@@ -101,38 +101,36 @@ def main():
     checkpoint_callback = ModelCheckpoint(save_top_k=2, 
                                         
                                             monitor="val_loss_accumulated")
-    
-    logger = TensorBoardLogger(save_dir=ckpt_pth)
-#------------------------------------------------------------
-   
+
+    # Cerca la versione esistente anche in test per riutilizzare lo stesso logger
     vs = os.listdir(path)
-    filt = []
-    
-    f_name, resume_path = 'None', 'None'
-    if not args.new_version and not args.test:
-        
-        for elem1 in vs: 
-            if 'version' in elem1:
-                filt.append(elem1)
-        if filt: 
-            versions =[elem.split("_")[-1]for elem in filt]
-            versions = sorted(versions)
-            version = f"version_{versions[-1]}"
-            resume_path = path + version + "/checkpoints/"
-            files = os.listdir(resume_path)
-            print(files)
-            for f in files: 
-                if "ckpt" in f:
-                    f_name = f
-                    break
-                else: 
-                    f_name = None
-            print(f_name)
+    filt = [elem for elem in vs if 'version' in elem]
+
+    if not args.new_version:
+        if filt:
+            versions = sorted([int(elem.split('_')[-1]) for elem in filt])
+            version = versions[-1]
         else:
-            print("⚠️ No previous versions found — skipping resume.")
-            resume_path, f_name = None, None
-    # original code: resume = None if args.new_version or args.test and f_name != None else resume_path + f_name
-    resume = None if (args.new_version or args.test or f_name is None or resume_path is None) else resume_path + f_name
+            version = None
+    else:
+        version = None
+
+    logger = TensorBoardLogger(save_dir=ckpt_pth, version=version)
+
+    # Imposta la variabile resume in base alla versione trovata
+    if version is not None:
+        resume_path = os.path.join(path, f"version_{version}", "checkpoints")
+        if os.path.exists(resume_path):
+            files = os.listdir(resume_path)
+            f_name = next((f for f in files if f.endswith(".ckpt")), None)
+            if f_name:
+                resume = os.path.join(resume_path, f_name)
+            else:
+                resume = None
+        else:
+            resume = None
+    else:
+        resume = None
     print(f"RESUME FROM: {resume}")
 
 #------------------------------------------------------------
