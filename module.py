@@ -107,7 +107,8 @@ class LaneModule(pl.LightningModule):
                         distance[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
-                        logits = res[0][:, -1], res[1][:, -1]
+                        logits, attns = res
+                        logits = logits[0][:, -1], logits[1][:, -1]
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
@@ -116,7 +117,6 @@ class LaneModule(pl.LightningModule):
                     attns_all.append(attns if attns is not None else torch.zeros_like(logits))
 
             logits_all = torch.stack(logits_all, dim=1)
-            attns_all = torch.stack(attns_all, dim=1)
             # ---------------- DEBUG PRINTS ----------------
             print(f"[DEBUG] logits_all shape: {logits_all.shape}")
             print(f"[DEBUG] angle shape (for loss): {angle[:,self.time_horizon:].shape}")
