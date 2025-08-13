@@ -218,6 +218,7 @@ def main():
         for pred in preds:
             if args.task != "multitask":
                 res, preds_1, preds_2 = pred[0], pred[1], pred[2]
+                print (f"Dimension of res: {res.shape}")
                 prediction, attention = res
                 if args.task == "angle":
                     save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working", module.time_horizon)
