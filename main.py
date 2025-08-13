@@ -17,7 +17,17 @@ import json
 import glob
 #function to save predictions
 def save_preds(logits, target, save_name, p):
+    print(f"Original logits shape: {logits.shape}")
+    logits_squeezed = logits.squeeze()
+    print(f"Logits shape after squeeze: {logits_squeezed.shape}")
     b, s = target.shape
+    print(f"Target shape: {target.shape}, b*s = {b*s}")
+    try:
+        logits_reshaped = logits_squeezed.reshape(b*s)
+        print(f"Logits shape after reshape: {logits_reshaped.shape}")
+    except Exception as e:
+        print(f"Error reshaping logits: {e}")
+        raise e
     df = pd.DataFrame()
     df['logits'] = logits.squeeze().reshape(b*s).tolist()
     df['target'] = target.squeeze().reshape(b*s).tolist()
