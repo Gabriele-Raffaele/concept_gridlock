@@ -23,8 +23,8 @@ def save_preds(logits, target, save_name, p, time_horizon=1):
     # Se time_horizon > 1, riduci il target agli indici effettivamente predetti
     if time_horizon > 1:
         target = target[:, time_horizon-1::time_horizon]
-        print(f"target shape (after alignment with time_horizon={time_horizon}): {target.shape}")
-
+        logits_squeezed = logits_squeezed[:, time_horizon-1::time_horizon]  # <-- aggiungi questo
+        print(f"logits shape (after alignment): {logits_squeezed.shape}")
     b, s = target.shape
     print(f"Target shape: {target.shape}, b*s = {b*s}")
     try:
