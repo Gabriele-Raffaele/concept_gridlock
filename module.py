@@ -97,6 +97,7 @@ class LaneModule(pl.LightningModule):
        # future, prediction after prediction, using previous outputs as inputs.
         if self.time_horizon > 1:
             logits_all = []
+            attns_all = []
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
@@ -105,18 +106,26 @@ class LaneModule(pl.LightningModule):
                     if self.multitask == "distance" and len(logits_all) > 0:
                         distance[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "multitask":
-                        logits, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
-                        logits = logits[0][:, -1], logits[1][:, -1]
+                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        logits = res[0][:, -1], res[1][:, -1]
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         logits = logits[:, -1]
                     logits_all.append(logits)
+                    attns_all.append(attns if attns is not None else torch.zeros_like(logits))
+
             logits_all = torch.stack(logits_all, dim=1)
+            attns_all = torch.stack(attns_all, dim=1)
+            # ---------------- DEBUG PRINTS ----------------
+            print(f"[DEBUG] logits_all shape: {logits_all.shape}")
+            print(f"[DEBUG] angle shape (for loss): {angle[:,self.time_horizon:].shape}")
+            print(f"[DEBUG] distance shape (for loss): {distance[:,self.time_horizon:].shape}")
+            # --------------------------------------------
+            res = (logits_all, attns_all)
 
-            return logits_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:]
+            return res, angle[:,self.time_horizon:], distance[:,self.time_horizon:]
 
-        
         res, probs = self(image_array, angle, distance, vego)
         return res, angle, distance
 
