@@ -16,10 +16,15 @@ import os
 import json
 import glob
 #function to save predictions
-def save_preds(logits, target, save_name, p):
+def save_preds(logits, target, save_name, p, time_horizon=1):
     print(f"Original logits shape: {logits.shape}")
     logits_squeezed = logits.squeeze()
     print(f"Logits shape after squeeze: {logits_squeezed.shape}")
+    # Se time_horizon > 1, riduci il target agli indici effettivamente predetti
+    if time_horizon > 1:
+        target = target[:, time_horizon-1::time_horizon]
+        print(f"target shape (after alignment with time_horizon={time_horizon}): {target.shape}")
+
     b, s = target.shape
     print(f"Target shape: {target.shape}, b*s = {b*s}")
     try:
@@ -215,14 +220,14 @@ def main():
                 res, preds_1, preds_2 = pred[0], pred[1], pred[2]
                 prediction, attention = res
                 if args.task == "angle":
-                    save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
+                    save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working", module.time_horizon)
                 else:
-                    save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working")
+                    save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working", module.time_horizon)
 
             else:
                 res, angle, dist = pred[0], pred[1], pred[2]
                 (preds_angle, preds_dist, param_angle, param_dist), attention = res
-                save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
-                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working")
+                save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working", module.time_horizon)
+                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working", module.time_horizon)
 if __name__ == "__main__":
     main()
