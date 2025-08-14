@@ -20,13 +20,12 @@ def save_preds(logits, target, save_name, p, time_horizon=1):
     print(f"Original logits shape: {logits.shape}")
     logits_squeezed = logits.squeeze(-1)  # toglie solo l'ultima dim, shape: [B, S]
     print(f"Logits shape after squeeze(-1): {logits_squeezed.shape}")
-
+    print(f"Target shape: {target.shape}, b*s = {b*s}")
     if time_horizon > 1:
         target = target[:, time_horizon-1::time_horizon]
         logits_squeezed = logits_squeezed[:, time_horizon-1::time_horizon]
 
     b, s = target.shape
-    logits_reshaped = logits_squeezed.reshape(b*s)
     print(f"Target shape: {target.shape}, b*s = {b*s}")
     try:
         logits_reshaped = logits_squeezed.reshape(b*s)
@@ -35,7 +34,7 @@ def save_preds(logits, target, save_name, p, time_horizon=1):
         print(f"Error reshaping logits: {e}")
         raise e
     df = pd.DataFrame()
-    df['logits'] = logits.squeeze().reshape(b*s).tolist()
+    df['logits'] = logits_reshaped.tolist()
     df['target'] = target.squeeze().reshape(b*s).tolist()
     df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
     print(f"Saved predictions to {p}/{save_name}.csv")
