@@ -18,14 +18,15 @@ import glob
 #function to save predictions
 def save_preds(logits, target, save_name, p, time_horizon=1):
     print(f"Original logits shape: {logits.shape}")
-    logits_squeezed = logits.squeeze()
-    print(f"Logits shape after squeeze: {logits_squeezed.shape}")
-    # Se time_horizon > 1, riduci il target agli indici effettivamente predetti
+    logits_squeezed = logits.squeeze(-1)  # toglie solo l'ultima dim, shape: [B, S]
+    print(f"Logits shape after squeeze(-1): {logits_squeezed.shape}")
+
     if time_horizon > 1:
         target = target[:, time_horizon-1::time_horizon]
-        logits_squeezed = logits_squeezed[:, time_horizon-1::time_horizon]  # <-- aggiungi questo
-        print(f"logits shape (after alignment): {logits_squeezed.shape}")
+        logits_squeezed = logits_squeezed[:, time_horizon-1::time_horizon]
+
     b, s = target.shape
+    logits_reshaped = logits_squeezed.reshape(b*s)
     print(f"Target shape: {target.shape}, b*s = {b*s}")
     try:
         logits_reshaped = logits_squeezed.reshape(b*s)
