@@ -20,7 +20,7 @@ def save_preds(logits, target, save_name, p, time_horizon=1):
     print(f"Original logits shape: {logits.shape}")
     logits_squeezed = logits.squeeze(-1)  # toglie solo l'ultima dim, shape: [B, S]
     print(f"Logits shape after squeeze(-1): {logits_squeezed.shape}")
-    print(f"Target shape: {target.shape}, b*s = {b*s}")
+    print(f"Target shape: {target.shape}")
     if time_horizon > 1:
         target = target[:, time_horizon-1::time_horizon]
         logits_squeezed = logits_squeezed[:, time_horizon-1::time_horizon]
