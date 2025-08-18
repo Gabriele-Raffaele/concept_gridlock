@@ -124,11 +124,7 @@ class LaneModule(pl.LightningModule):
                 res = ((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all)
             else:
                 logits_all = torch.stack(logits_all, dim=1)
-                # ---------------- DEBUG PRINTS ----------------
-                print(f"[DEBUG] logits_all shape: {logits_all.shape}")
-                print(f"[DEBUG] angle shape (for loss): {angle[:,self.time_horizon:].shape}")
-                print(f"[DEBUG] distance shape (for loss): {distance[:,self.time_horizon:].shape}")
-                # --------------------------------------------
+               
                 res = (logits_all, attns_all)
 
             return res, angle[:,self.time_horizon:], distance[:,self.time_horizon:]
@@ -138,8 +134,8 @@ class LaneModule(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        logits, probs = self(image_array, angle, distance, vego)
-        loss = self.calculate_loss(logits, angle, distance)
+        res, probs = self(image_array, angle, distance, vego)
+        loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
@@ -185,12 +181,7 @@ class LaneModule(pl.LightningModule):
             else:
                 logits_all = torch.stack(logits_all, dim=1)
                 loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
-            # ---------------- DEBUG PRINTS ----------------
-            print(f"[DEBUG] logits_all shape: {logits_all.shape}" if self.multitask != "multitask" else f"[DEBUG] logits_angle_all shape: {logits_angle_all.shape}, logits_distance_all shape: {logits_distance_all.shape}")
-            print(f"[DEBUG] angle shape (for loss): {angle[:,self.time_horizon:].shape}")
-            print(f"[DEBUG] distance shape (for loss): {distance[:,self.time_horizon:].shape}")
-            # --------------------------------------------
-
+          
             if self.multitask == "multitask":
                 loss_angle, loss_dist, param_angle, param_dist = loss
                 self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
