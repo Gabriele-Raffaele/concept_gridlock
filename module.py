@@ -39,13 +39,13 @@ class LaneModule(pl.LightningModule):
         out = (input[~mask]-target[~mask])**2
         return out.mean() if reduction == "mean" else out 
 
-    def calculate_loss(self, logits, angle, distance):
+    def calculate_loss(self, res, angle, distance):
         sm = nn.Softmax(dim=1)
         if self.multitask == "multitask":
             
             #ho messo logits[0] perchè il forward restituisce una tupla, prima era logits
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
-            logits_angle, logits_dist, param_angle, param_dist = logits[0]
+            logits_angle, logits_dist, param_angle, param_dist = res[0]
             mask = distance.squeeze() == 0.0
             #TODO: The intervention Boolean flag indicates whether 
             # a special type of supervision is being used in which:
@@ -67,14 +67,14 @@ class LaneModule(pl.LightningModule):
         else:
             target = angle if self.multitask == "angle" else distance
             mask = distance.squeeze() == 0.0
-            logits = logits[0] if isinstance(logits, tuple) else logits
+            logits = res[0] if isinstance(res, tuple) else res
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
             return loss
 
     def training_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        logits, attns = self(image_array, angle, distance, vego)
-        loss = self.calculate_loss(logits, angle, distance)
+        res, probs = self(image_array, angle, distance, vego)
+        loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             #0.3 and 0.7 hyperparameters used to give more importance to distance prediction than angle prediction -G.R.
@@ -115,7 +115,7 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits = logits[:, -1]
                         logits_all.append(logits)
-                    attns_all.append(attns if attns is not None else torch.zeros_like(logits))
+                    attns_all.append(attns if attns is not None else torch.zeros_like(logits[-1]))
 
             if self.multitask == "multitask":
                 logits_angle_all = torch.stack(logits_angle_all, dim=1)
@@ -165,8 +165,8 @@ class LaneModule(pl.LightningModule):
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
+                        param_angle, param_dist= logits[2], logits[3]
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
-                        print(f"DEBUG PARAMS  {logits[2].shape}, {logits[3].shape}, {logits[2]}, {logits[3]}")
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
 
@@ -175,15 +175,15 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits = logits[:, -1]
                         logits_all.append(logits)
-                    attns_all = attns if attns is not None else torch.zeros_like(logits_all[-1])
+                    attns_all = attns if attns is not None else torch.zeros_like(logits[-1])
 
             if self.multitask == "multitask":
                 logits_angle_all = torch.stack(logits_angle_all, dim=1)
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
-                loss = self.calculate_loss((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:])
+                loss = self.calculate_loss(((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
             else:
                 logits_all = torch.stack(logits_all, dim=1)
-                loss = self.calculate_loss(logits_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:])
+                loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
             # ---------------- DEBUG PRINTS ----------------
             print(f"[DEBUG] logits_all shape: {logits_all.shape}" if self.multitask != "multitask" else f"[DEBUG] logits_angle_all shape: {logits_angle_all.shape}, logits_distance_all shape: {logits_distance_all.shape}")
             print(f"[DEBUG] angle shape (for loss): {angle[:,self.time_horizon:].shape}")
