@@ -108,6 +108,7 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits_angle = logits[0][:, -1]
                         logits_distance = logits[1][:, -1]
+                        param_angle, param_dist = logits[2], logits[3]
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
                     else:
@@ -120,7 +121,7 @@ class LaneModule(pl.LightningModule):
             if self.multitask == "multitask":
                 logits_angle_all = torch.stack(logits_angle_all, dim=1)
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
-                res = ((logits_angle_all, logits_distance_all), attns_all)
+                res = ((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all)
             else:
                 logits_all = torch.stack(logits_all, dim=1)
                 # ---------------- DEBUG PRINTS ----------------
