@@ -190,7 +190,13 @@ class LaneModule(pl.LightningModule):
             print(f"[DEBUG] distance shape (for loss): {distance[:,self.time_horizon:].shape}")
             # --------------------------------------------
 
-            self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+            if self.multitask == "multitask":
+                loss_angle, loss_dist, param_angle, param_dist = loss
+                self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
+                self.log("test_loss_distance", loss_dist, on_epoch=True, batch_size=self.bs, sync_dist=True)
+                # eventualmente puoi loggare anche param_angle e param_dist separatamente, se serve
+            else:
+                self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
             return loss
     
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
