@@ -42,6 +42,7 @@ class LaneModule(pl.LightningModule):
     def calculate_loss(self, logits, angle, distance):
         sm = nn.Softmax(dim=1)
         if self.multitask == "multitask":
+            
             #ho messo logits[0] perchè il forward restituisce una tupla, prima era logits
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
             logits_angle, logits_dist, param_angle, param_dist = logits[0]
@@ -165,18 +166,21 @@ class LaneModule(pl.LightningModule):
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
+                        print(f"DEBUG PARAMS  {logits[2].shape}, {logits[3].shape}, {logits[2]}, {logits[3]}")
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
+
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         logits = logits[:, -1]
                         logits_all.append(logits)
+                    attns_all = attns if attns is not None else torch.zeros_like(logits_all[-1])
 
             if self.multitask == "multitask":
                 logits_angle_all = torch.stack(logits_angle_all, dim=1)
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
-                loss = self.calculate_loss((logits_angle_all, logits_distance_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
+                loss = self.calculate_loss((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:])
             else:
                 logits_all = torch.stack(logits_all, dim=1)
                 loss = self.calculate_loss(logits_all, angle[:,self.time_horizon:], distance[:,self.time_horizon:])
