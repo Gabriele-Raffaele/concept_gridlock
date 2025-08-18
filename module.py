@@ -194,7 +194,7 @@ class LaneModule(pl.LightningModule):
                 loss_angle, loss_dist, param_angle, param_dist = loss
                 self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss_distance", loss_dist, on_epoch=True, batch_size=self.bs, sync_dist=True)
-                # eventualmente puoi loggare anche param_angle e param_dist separatamente, se serve
+                
             else:
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
             return loss
@@ -221,9 +221,17 @@ class LaneModule(pl.LightningModule):
         self.log_dict({"val_loss_accumulated": losses }, batch_size=self.bs, sync_dist=True)
 
     def test_epoch_end(self, outputs):
-        losses = torch.mean(torch.stack([x for x in outputs]))
-        self.log_dict({"test_loss_accumulated": losses }, batch_size=self.bs, sync_dist=True)
-
+        if self.multitask == "multitask":
+            loss_angles = torch.stack([x[0] for x in outputs])
+            loss_dists  = torch.stack([x[1] for x in outputs])
+            self.log_dict({
+                "test_loss_angle_accum": loss_angles.mean(),
+                "test_loss_distance_accum": loss_dists.mean()
+            }, batch_size=self.bs, sync_dist=True)
+        else:
+            # single task
+            losses = torch.stack(outputs)
+            self.log("test_loss_accumulated", losses.mean(), batch_size=self.bs, sync_dist=True)
     #------------------------------------------------------------
     def train_dataloader(self):
         return self.get_dataloader(dataset_type="train")
