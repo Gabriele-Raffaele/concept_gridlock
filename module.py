@@ -103,12 +103,14 @@ class LaneModule(pl.LightningModule):
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
-                        logits = logits[0][:, -1], logits[1][:, -1]
+                        logits_angle = logits[0][:, -1]
+                        logits_distance = logits[1][:, -1]
+                        logits_all.append((logits_angle, logits_distance))
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         logits = logits[:, -1]
-                    logits_all.append(logits)
+                        logits_all.append(logits)
                     attns_all.append(attns if attns is not None else torch.zeros_like(logits))
 
             logits_all = torch.stack(logits_all, dim=1)
@@ -152,12 +154,14 @@ class LaneModule(pl.LightningModule):
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
-                        logits = logits[0][:, -1], logits[1][:, -1]
+                        logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
+                        logits_all.append((logits_angle, logits_distance))
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         logits = logits[:, -1]
-                    logits_all.append(logits)
+                        logits_all.append(logits)
+                        
             logits_all = torch.stack(logits_all, dim=1)
             # ---------------- DEBUG PRINTS ----------------
             print(f"[DEBUG] logits_all shape: {logits_all.shape}")
