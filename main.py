@@ -208,10 +208,10 @@ def main():
         else:
             ckpt_path = args.checkpoint_path
         print(f"Using checkpoint: {ckpt_path}")
-        #test_results = test_trainer.test(module, ckpt_path=ckpt_path)
-        #result_dir = os.path.dirname(ckpt_path)
-        #with open(f"{result_dir}/test_metrics.json", "w") as f:
-        #    json.dump(test_results, f, indent=4)
+        test_results = test_trainer.test(module, ckpt_path=ckpt_path)
+        result_dir = os.path.dirname(ckpt_path)
+        with open(f"{result_dir}/test_metrics.json", "w") as f:
+            json.dump(test_results, f, indent=4)
 
         preds = test_trainer.predict(module, ckpt_path=ckpt_path)
         #save_path =  "."
