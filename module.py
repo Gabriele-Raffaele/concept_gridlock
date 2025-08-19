@@ -152,20 +152,22 @@ class LaneModule(pl.LightningModule):
             logits_all = []
             logits_angle_all = []
             logits_distance_all = []
+            angle_autoreg = angle.clone()
+            distance_autoreg = distance.clone()
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
-                    input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
+                    input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle_autoreg[:,0:i+j], distance_autoreg[:,0:i+j]
                     if self.multitask == "angle" and len(logits_all) > 0:
-                        angle[:, i+j] = logits_all[-1].squeeze()
+                        angle_autoreg[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "distance" and len(logits_all) > 0:
-                        distance[:, i+j] = logits_all[-1].squeeze()
-                    if self.multitask == "multitask":
+                        distance_autoreg[:, i+j] = logits_all[-1].squeeze()
+                    if self.multitask == "multitask" and len(logits_angle_all) > 0 and len(logits_distance_all) > 0:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         param_angle, param_dist= logits[2], logits[3]
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
-                        angle[:, i+j] = logits_angle.squeeze(-1)
-                        distance[:, i+j] = logits_distance.squeeze(-1)
+                        angle_autoreg[:, i+j] = logits_angle.squeeze()
+                        distance_autoreg[:, i+j] = logits_distance.squeeze()
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
                         print(f"DEBUG: angle={logits_angle.shape}, distance={logits_distance.shape}")
