@@ -164,6 +164,8 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         param_angle, param_dist= logits[2], logits[3]
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
+                        angle[:, i+j] = logits_angle.squeeze()
+                        distance[:, i+j] = logits_distance.squeeze()
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
                     else:
