@@ -61,6 +61,7 @@ def get_arg_parser():
     parser.add_argument('-ground_truth', default="normal", type=str) 
     parser.add_argument('-dev_run', default=False, type=bool) 
     parser.add_argument('-checkpoint_path', default='', type=str)
+    parser.add_argument('-time_horizon', default=1, type=int, help="Time horizon for predictions")
     return parser
 
 
@@ -107,7 +108,9 @@ def main():
                         ground_truth=args.ground_truth, 
                         intervention=args.intervention_prediction, 
                         dataset_path=args.dataset_path, 
-                        dataset_fraction=args.dataset_fraction)
+                        dataset_fraction=args.dataset_fraction,
+                        time_horizon=args.time_horizon
+                        )
     #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
     ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
     path = ckpt_pth + "/lightning_logs/" 
