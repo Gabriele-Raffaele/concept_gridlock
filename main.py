@@ -163,7 +163,10 @@ def main():
       
         max_epochs=args.max_epochs,
         default_root_dir=ckpt_pth ,
-        callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback, early_stop_callback],
+        callbacks=[TQDMProgressBar(refresh_rate=5), 
+                   checkpoint_callback 
+                   #early_stop_callback
+                   ],
         log_every_n_steps=1,
         )
     test_trainer = pl.Trainer(
