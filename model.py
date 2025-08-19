@@ -161,7 +161,7 @@ class VTN(nn.Module):
             logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
             #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
             probs = logits_per_image.softmax(dim=-1)
-            probs = probs.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1))
+            probs = logits_per_image.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1))
             if not self.train_concepts: probs = probs.detach()
 
         angle = torch.roll(angle, shifts=1, dims=1)
