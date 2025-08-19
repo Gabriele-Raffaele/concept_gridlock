@@ -51,7 +51,7 @@ def get_arg_parser():
     parser.add_argument('-dataset_fraction', default=1, type=float) 
     parser.add_argument('-dataset', default="comma", type=str)  
     parser.add_argument('-backbone', default="none", type=str) 
-    parser.add_argument('-dataset_path', default='/kaggle/input/filtered-chunk1', type=str)
+    parser.add_argument('-dataset_path', default='/kaggle/input/filtered-chunk-hdf5', type=str)
     parser.add_argument('-concept_features', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-new_version', action=argparse.BooleanOptionalAction) 
     parser.add_argument('-intervention_prediction', action=argparse.BooleanOptionalAction) 
