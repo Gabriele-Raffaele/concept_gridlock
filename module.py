@@ -161,7 +161,7 @@ class LaneModule(pl.LightningModule):
                         angle_autoreg[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "distance" and len(logits_all) > 0:
                         distance_autoreg[:, i+j] = logits_all[-1].squeeze()
-                    if self.multitask == "multitask" and len(logits_angle_all) > 0 and len(logits_distance_all) > 0:
+                    if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
                         param_angle, param_dist= logits[2], logits[3]
