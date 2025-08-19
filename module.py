@@ -166,8 +166,8 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         param_angle, param_dist= logits[2], logits[3]
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
-                        angle_autoreg[:, i+j] = logits_angle[-1].squeeze()
-                        distance_autoreg[:, i+j] = logits_distance[-1].squeeze()
+                        angle_autoreg[:, i+j] = logits_angle.squeeze(-1)
+                        distance_autoreg[:, i+j] = logits_distance.squeeze(-1)
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
                         #print(f"DEBUG: angle={logits_angle.shape}, distance={logits_distance.shape}")
