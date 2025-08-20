@@ -181,7 +181,7 @@ class LaneModule(pl.LightningModule):
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
-                        print(f"DEBUG: logits={logits.shape}, attns={attns.shape}")
+                        #print(f"DEBUG: logits={logits.shape}, attns={attns.shape}")
                         logits = logits[:, -1]
                         print(f"DEBUG: logits={logits.shape}")
                         logits_all.append(logits)
