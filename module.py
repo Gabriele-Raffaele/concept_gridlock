@@ -96,19 +96,22 @@ class LaneModule(pl.LightningModule):
             logits_angle_all = []
             logits_distance_all = []
             attns_all = []
+            angle_autoreg = angle.clone()
+            distance_autoreg = distance.clone()
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
-                    input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle[:,0:i+j], distance[:,0:i+j]
+                    input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle_autoreg[:,0:i+j], distance_autoreg[:,0:i+j]
                     if self.multitask == "angle" and len(logits_all) > 0:
-                        angle[:, i+j] = logits_all[-1].squeeze()
+                        angle_autoreg[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "distance" and len(logits_all) > 0:
-                        distance[:, i+j] = logits_all[-1].squeeze()
+                        distance_autoreg[:, i+j] = logits_all[-1].squeeze()
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
-                        logits_angle = logits[0][:, -1]
-                        logits_distance = logits[1][:, -1]
-                        param_angle, param_dist = logits[2], logits[3]
+                        param_angle, param_dist= logits[2], logits[3]
+                        logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
+                        angle_autoreg[:, i+j] = logits_angle.squeeze(-1)
+                        distance_autoreg[:, i+j] = logits_distance.squeeze(-1)
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
                     else:
@@ -116,7 +119,7 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits = logits[:, -1]
                         logits_all.append(logits)
-                    attns_all.append(attns if attns is not None else torch.zeros_like(logits[-1]))
+                    attns_all.append(attns if attns is not None else torch.zeros_like(attns))
 
             if self.multitask == "multitask":
                 logits_angle_all = torch.stack(logits_angle_all, dim=1)
@@ -153,14 +156,15 @@ class LaneModule(pl.LightningModule):
             logits_angle_all = []
             logits_distance_all = []
             angle_autoreg = angle.clone()
+            attns_all = []
             distance_autoreg = distance.clone()
             for i in range(self.time_horizon, vego.shape[1], self.time_horizon):
                 for j in range(self.time_horizon):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle_autoreg[:,0:i+j], distance_autoreg[:,0:i+j]
                     if self.multitask == "angle" and len(logits_all) > 0:
-                        angle_autoreg[:, i+j] = logits_all[-1].squeeze()
+                        angle_autoreg[:, i+j] = logits_all.squeeze()
                     if self.multitask == "distance" and len(logits_all) > 0:
-                        distance_autoreg[:, i+j] = logits_all[-1].squeeze()
+                        distance_autoreg[:, i+j] = logits_all.squeeze()
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
@@ -177,7 +181,7 @@ class LaneModule(pl.LightningModule):
                         logits, attns = res
                         logits = logits[:, -1]
                         logits_all.append(logits)
-                    attns_all = attns if attns is not None else torch.zeros_like(logits[-1])
+                    attns_all.append(attns if attns is not None else torch.zeros_like(attns))
 
             if self.multitask == "multitask":
                 logits_angle_all = torch.stack(logits_angle_all, dim=1)
