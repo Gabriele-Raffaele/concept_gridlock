@@ -181,9 +181,9 @@ class LaneModule(pl.LightningModule):
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
                         logits, attns = res
-                        print(f"DEBUG: logits={logits.shape}")
+                        #print(f"DEBUG: logits={logits.shape}")
                         logits = logits[:, -1]
-                        print(f"DEBUG: logits={logits.shape}")
+                        #print(f"DEBUG: logits={logits.shape}")
                         logits_all.append(logits)
                     attns_all.append(attns if attns is not None else torch.zeros_like(attns))
 
