@@ -61,7 +61,7 @@ def get_arg_parser():
     parser.add_argument('-ground_truth', default="normal", type=str) 
     parser.add_argument('-dev_run', default=False, type=bool) 
     parser.add_argument('-checkpoint_path', default='', type=str)
-    parser.add_argument('-time_horizon', default=2, type=int, help="Time horizon for predictions")
+    parser.add_argument('-time_horizon', default=1, type=int, help="Time horizon for predictions")
     return parser
 
 
