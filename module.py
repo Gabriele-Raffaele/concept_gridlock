@@ -152,6 +152,7 @@ class LaneModule(pl.LightningModule):
     def test_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         if self.time_horizon > 1:
+            print(f"DEBUG: time_horizon={self.time_horizon}")
             logits_all = []
             logits_angle_all = []
             logits_distance_all = []
