@@ -192,24 +192,28 @@ class LaneModule(pl.LightningModule):
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
                 loss = self.calculate_loss(((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 loss_angle, loss_dist, param_angle, param_dist = loss
+                param_angle, param_dist = 0.3, 0.7
+                loss = (param_angle * loss_angle) + (param_dist * loss_dist)
                 self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss_distance", loss_dist, on_epoch=True, batch_size=self.bs, sync_dist=True)
+                self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
+                return (loss_angle, loss_dist)
             else:
                 logits_all = torch.stack(logits_all, dim=1)
                 loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
-                self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
-                     
-            return loss
+                self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)    
+                return loss
     
         _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        logits, attns = self(image_array, angle, distance, vego)
-        loss = self.calculate_loss(logits, angle, distance)
+        res, probs = self(image_array, angle, distance, vego)
+        loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
             self.log_dict({"test_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"test_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+            return (loss_angle, loss_dist)
         self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
         return loss
     #------------------------------------------------------------
