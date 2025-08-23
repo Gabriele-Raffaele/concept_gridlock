@@ -17,12 +17,16 @@ class CommaDataset(Dataset):
         dataset_path ="/kaggle/input/filtered-chunk-hdf5" ,
         dataset_fraction=1.0
     ):
-        assert dataset_type in ["train", "val", "test"]
+        #assert dataset_type in ["train", "val", "test"]
+        assert dataset_type in ["train", "val"]
+
+        #WHY??? -G.R.
+        '''
         if dataset_type == "val":
             dataset_type = "test" 
         if dataset_type == "test":
             dataset_type = "val" 
-        
+        '''
         self.dataset_type = dataset_type
         self.dataset_fraction = dataset_fraction
         self.max_len = 240
