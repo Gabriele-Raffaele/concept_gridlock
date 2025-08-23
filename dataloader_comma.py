@@ -41,8 +41,8 @@ class CommaDataset(Dataset):
         self.h5_file = h5py.File(data_path, "r")
         corrupt_idx = 62
         self.keys = list(self.h5_file.keys())
-        if dataset_type == "train":
-            self.keys.pop(corrupt_idx)
+        #if dataset_type == "train":
+        #    self.keys.pop(corrupt_idx)
             
     def __len__(self):
         return len(self.keys)
