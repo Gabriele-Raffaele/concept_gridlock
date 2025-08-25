@@ -18,7 +18,7 @@ class CommaDataset(Dataset):
         dataset_fraction=1.0
     ):
         assert dataset_type in ["train", "val", "test"]
-        #assert dataset_type in ["train", "val"]
+
 
         #WHY??? -G.R.
         '''
