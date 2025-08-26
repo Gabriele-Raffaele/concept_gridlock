@@ -161,7 +161,7 @@ class VTN(nn.Module):
             
             logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
             #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
-
+            """Add code to find the logits using the key seq_key"""
             probs = torch.sigmoid(logits_per_image)
             #probs = logits_per_image.softmax(dim=-1) # [batch_size*seq_len, num_scenarios]
             probs = probs.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
