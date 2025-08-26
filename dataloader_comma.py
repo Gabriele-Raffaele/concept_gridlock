@@ -14,7 +14,7 @@ class CommaDataset(Dataset):
         multitask="angle",
         ground_truth="desired",
         return_full=False, 
-        dataset_path ="/kaggle/input/filtered-chunk-hdf5" ,
+        dataset_path ="/kaggle/input/final-hdf5-files" ,
         dataset_fraction=1.0
     ):
         assert dataset_type in ["train", "val", "test"]
@@ -39,7 +39,7 @@ class CommaDataset(Dataset):
         data_path = f"{dataset_path}/filtered_chunk1_{dataset_type}.hdf5" if ground_truth == "regular" else f"{dataset_path}/filtered_chunk1_{dataset_type}.hdf5"
         self.people_seqs = []
         self.h5_file = h5py.File(data_path, "r")
-        corrupt_idx = 62
+        #corrupt_idx = 62
         self.keys = list(self.h5_file.keys())
         #if dataset_type == "train":
         #    self.keys.pop(corrupt_idx)
@@ -49,7 +49,9 @@ class CommaDataset(Dataset):
 
     def __getitem__(self, idx):
         person_seq = {}
+        print(f"Idx: {idx}")
         seq_key  = self.keys[idx]
+        print(f"Seq key: {seq_key}")
         keys_ = self.h5_file[seq_key].keys()#'angle', 'brake', 'dist', 'gas', 'image', 'time', 'vEgo'
         file = self.h5_file
         
