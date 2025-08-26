@@ -85,11 +85,11 @@ class CommaDataset(Dataset):
         images = self.resize(images)
         images_cropped = images
         intervention = np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool) 
-        res = images_cropped, images_cropped,  sequences['vEgo'],  sequences['angle'], distances
+        res = images_cropped, images_cropped,  sequences['vEgo'],  sequences['angle'], distances, seq_key
         if self.return_full: 
-            return images_cropped,  sequences['vEgo'],  sequences['angle'], distances, np.array(sequences['gaspressed']).astype(bool),  np.array(sequences['brakepressed']).astype(bool) , np.array(sequences['CruiseStateenabled']).astype(bool)
+            return images_cropped,  sequences['vEgo'],  sequences['angle'], distances, np.array(sequences['gaspressed']).astype(bool),  np.array(sequences['brakepressed']).astype(bool) , np.array(sequences['CruiseStateenabled']).astype(bool), seq_key
         if self.multitask == "distance":
-            res = images_cropped, images_cropped, sequences['vEgo'], distances, sequences['angle']
+            res = images_cropped, images_cropped, sequences['vEgo'], distances, sequences['angle'], seq_key
         if self.multitask == "intervention":
-            res = images_cropped, images_cropped, sequences['vEgo'], distances, torch.tensor(np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool))
-        return res 
+            res = images_cropped, images_cropped, sequences['vEgo'], distances, torch.tensor(np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool)), seq_key
+        return res

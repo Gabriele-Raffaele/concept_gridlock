@@ -29,8 +29,8 @@ class LaneModule(pl.LightningModule):
         #self.save_hyperparameters(ignore=['model'])
         self.bce_loss = nn.BCELoss()
 
-    def forward(self, x, angle, distance, vego):
-        return self.model(x, angle, distance, vego)
+    def forward(self, x, angle, distance, vego, seq_key):
+        return self.model(x, angle, distance, vego, seq_key)
 
     def mse_loss(self, input, target, mask, reduction="mean"):
         input = input.float()
@@ -72,8 +72,8 @@ class LaneModule(pl.LightningModule):
             return loss
 
     def training_step(self, batch, batch_idx):
-        _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        res, probs = self(image_array, angle, distance, vego)
+        _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
+        res, probs = self(image_array, angle, distance, vego, seq_key)
         loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
@@ -86,7 +86,7 @@ class LaneModule(pl.LightningModule):
         return loss
 
     def predict_step(self, batch, batch_idx):
-        _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
+        _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
        #TODO: time_horizon is an integer parameter that indicates how often the model 
        # should make a prediction during inference or testing. It is used to simulate 
        # a sequential prediction over time, as if the vehicle were proceeding into the 
@@ -106,7 +106,7 @@ class LaneModule(pl.LightningModule):
                     if self.multitask == "distance" and len(logits_all) > 0:
                         distance_autoreg[:, i+j] = logits_all[-1].squeeze(-1)
                     if self.multitask == "multitask":
-                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
                         logits, attns = res
                         param_angle, param_dist= logits[2], logits[3]
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
@@ -115,7 +115,7 @@ class LaneModule(pl.LightningModule):
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
                     else:
-                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
                         logits, attns = res
                         logits = logits[:, -1]
                         logits_all.append(logits)
@@ -132,12 +132,12 @@ class LaneModule(pl.LightningModule):
 
             return res, angle[:,self.time_horizon:], distance[:,self.time_horizon:]
 
-        res, probs = self(image_array, angle, distance, vego)
+        res, probs = self(image_array, angle, distance, vego, seq_key)
         return res, angle, distance
 
     def validation_step(self, batch, batch_idx):
-        _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        res, probs = self(image_array, angle, distance, vego)
+        _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
+        res, probs = self(image_array, angle, distance, vego, seq_key)
         loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
@@ -150,7 +150,7 @@ class LaneModule(pl.LightningModule):
         return loss
 
     def test_step(self, batch, batch_idx):
-        _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
+        _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         if self.time_horizon > 1:
             print(f"DEBUG: time_horizon={self.time_horizon}")
             logits_all = []
@@ -169,7 +169,7 @@ class LaneModule(pl.LightningModule):
                         #print(f"DEBUG: logits_distance={logits_all[-1].squeeze().shape}")
                         distance_autoreg[:, i+j] = logits_all[-1].squeeze(-1)
                     if self.multitask == "multitask":
-                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
                         logits, attns = res
                         param_angle, param_dist= logits[2], logits[3]
                         logits_angle, logits_distance = logits[0][:, -1], logits[1][:, -1]
@@ -180,7 +180,7 @@ class LaneModule(pl.LightningModule):
                         #print(f"DEBUG: angle={logits_angle.shape}, distance={logits_distance.shape}")
                        
                     else:
-                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego)
+                        res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
                         logits, attns = res
                         #print(f"DEBUG: logits={logits.shape}")
                         logits = logits[:, -1]
@@ -204,9 +204,9 @@ class LaneModule(pl.LightningModule):
                 loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)    
                 return loss
-    
-        _, image_array, vego, angle, distance, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-        res, probs = self(image_array, angle, distance, vego)
+
+        _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
+        res, probs = self(image_array, angle, distance, vego, seq_key)
         loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
