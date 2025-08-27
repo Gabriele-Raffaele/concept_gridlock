@@ -159,7 +159,7 @@ class VTN(nn.Module):
         x = img
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
-            flag =True
+            flag =False
             if flag:
                 logits_per_image = []
                 main_dir = "/kaggle/input/road-logits"
@@ -189,7 +189,7 @@ class VTN(nn.Module):
                 logits_per_image = torch.cat(logits_per_image, dim=0)  
                 
 
-            #logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+            logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
             #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
             probs = torch.sigmoid(logits_per_image)
             #probs = logits_per_image.softmax(dim=-1) # [batch_size*seq_len, num_scenarios]
