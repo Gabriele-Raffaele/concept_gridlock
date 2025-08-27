@@ -217,6 +217,7 @@ class VTN(nn.Module):
 
         #concatenate the sensor features 
         if self.concept_features:
+            probs = probs.to(x.device)
             x = torch.cat([x, probs], dim=-1) if self.backbone_name != 'none' else probs
         x = torch.cat((x, angle.unsqueeze(-1)), dim=-1)
         x = torch.cat((x, distance.unsqueeze(-1)), dim=-1)
