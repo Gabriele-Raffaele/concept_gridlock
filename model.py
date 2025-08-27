@@ -159,40 +159,43 @@ class VTN(nn.Module):
         x = img
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
-            logits_per_image = []
-            main_dir = "/kaggle/input/road-logits"
-            for key in seq_key:
-                dir = f"{main_dir}/{key}.pt"
-                data = torch.load(dir)
-                if "video_name" in data and data["video_name"] != key:
-                    print(f"⚠️ Mismatch: {key} not found, instead found {data['video_name']} in {dir}")
-                    found = False
-                    for fname in os.listdir(main_dir):
-                        if fname.endswith(".pt"):
-                            path = os.path.join(main_dir, fname)
-                            other_data = torch.load(path)
-                            if "video_name" in other_data and other_data["video_name"] == key:
-                                print(f"✅ Found: {fname}")
-                                data = other_data
-                                found = True
-                                break
+            flag =False
+            if flag:
+                logits_per_image = []
+                main_dir = "/kaggle/input/road-logits"
+                for key in seq_key:
+                    dir = f"{main_dir}/{key}.pt"
+                    data = torch.load(dir)
+                    if "video_name" in data and data["video_name"] != key:
+                        print(f"⚠️ Mismatch: {key} not found, instead found {data['video_name']} in {dir}")
+                        found = False
+                        for fname in os.listdir(main_dir):
+                            if fname.endswith(".pt"):
+                                path = os.path.join(main_dir, fname)
+                                other_data = torch.load(path)
+                                if "video_name" in other_data and other_data["video_name"] == key:
+                                    print(f"✅ Found: {fname}")
+                                    data = other_data
+                                    found = True
+                                    break
 
-                    if not found:
-                        print(f"❌ None found with video_name = {key}, skipping to CLIP")
-                        #TODO: Insert code to handle missing video_name
-                        logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
-                        break
+                        if not found:
+                            print(f"❌ None found with video_name = {key}, skipping to CLIP")
+                            #TODO: Insert code to handle missing video_name
+                            logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+                            break
+                    
+                    logits_per_image.append(data['concepts'][:, 1:])
+                logits_per_image = torch.cat(logits_per_image, dim=0)  
                 
-                logits_per_image.append(data['concepts'][:, 1:])
-            logits_per_image = torch.cat(logits_per_image, dim=0)  
-            print("Final shape:", logits_per_image.shape)
 
-            #logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+            logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
             #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
             #probs = torch.sigmoid(logits_per_image)
             probs = logits_per_image.softmax(dim=-1) # [batch_size*seq_len, num_scenarios]
             probs = probs.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            
+            if flag:
+                probs = probs.to(x.device, dtype=torch.float32)
             if not self.train_concepts: probs = probs.detach()
 
         angle = torch.roll(angle, shifts=1, dims=1)
@@ -216,7 +219,7 @@ class VTN(nn.Module):
         #concatenate the sensor features 
         if self.concept_features:
             #added -G.R.
-            probs = probs.to(x.device, dtype=torch.float32)
+            #probs = probs.to(x.device, dtype=torch.float32)
             x = torch.cat([x, probs], dim=-1) if self.backbone_name != 'none' else probs
         x = torch.cat((x, angle.unsqueeze(-1)), dim=-1)
         x = torch.cat((x, distance.unsqueeze(-1)), dim=-1)
