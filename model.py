@@ -159,8 +159,6 @@ class VTN(nn.Module):
         x = img
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
-            print(f"🔎 seq_key Shape: {len(seq_key)}")
-            print(f"🔎 seq_key : {seq_key}")
             logits_per_image = []
             main_dir = "/kaggle/input/road-logits"
             for key in seq_key:
@@ -217,6 +215,7 @@ class VTN(nn.Module):
 
         #concatenate the sensor features 
         if self.concept_features:
+            #added -G.R.
             probs = probs.to(x.device, dtype=torch.float32)
             x = torch.cat([x, probs], dim=-1) if self.backbone_name != 'none' else probs
         x = torch.cat((x, angle.unsqueeze(-1)), dim=-1)
