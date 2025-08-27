@@ -164,6 +164,7 @@ class VTN(nn.Module):
             logits_per_image = []
             main_dir = "kaggle/input/road-logits"
             for key in seq_key:
+                key = key.replace("|", "_")
                 dir = f"{main_dir}/{key}.pt"
                 data = torch.load(dir)
                 if "video_name" in data and data["video_name"] != key:
