@@ -7,7 +7,7 @@ p = "/kaggle/working/concept_gridlock/scenarios/scenarios_road.txt"
 with open(p) as file:
     lines = [line.strip() for line in file]
 scenarios = lines
-#scenarios_tokens = clip.tokenize(scenarios)
+scenarios_tokens = clip.tokenize(scenarios)
 
 #scenarios = random.sample(scenarios, 300)
 #with open("scenarios_small_100.txt", "w") as file:
