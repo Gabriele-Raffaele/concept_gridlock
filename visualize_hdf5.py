@@ -1,6 +1,6 @@
 import h5py
 
-file_path = "gas_and_brake_val_comma_chunk_1_w_imgs.hdf5"
+file_path = "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/concept_gridlock/filtered_chunk1_test.hdf5"
 
 with h5py.File(file_path, "r") as f:
     print("Chiavi principali nel file HDF5:")

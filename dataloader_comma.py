@@ -49,9 +49,7 @@ class CommaDataset(Dataset):
 
     def __getitem__(self, idx):
         person_seq = {}
-        print(f"Idx: {idx}")
         seq_key  = self.keys[idx]
-        print(f"Seq key: {seq_key}")
         keys_ = self.h5_file[seq_key].keys()#'angle', 'brake', 'dist', 'gas', 'image', 'time', 'vEgo'
         file = self.h5_file
         
