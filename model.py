@@ -157,9 +157,9 @@ class VTN(nn.Module):
         # we need to roll the previous sensor features, so that we do not include the step that we want to predict
         # we also substitude empty 0th entry then with 1st entry
         x = img
+        flag =True
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
-            flag =False
             if flag:
                 logits_per_image = []
                 main_dir = "/kaggle/input/road-logits"
@@ -188,10 +188,11 @@ class VTN(nn.Module):
                     logits_per_image.append(data['concepts'][:, 1:])
                 logits_per_image = torch.cat(logits_per_image, dim=0)  
                 
-
-            logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+            if not flag:
+                logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+                probs = torch.sigmoid(logits_per_image)
             #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
-            probs = torch.sigmoid(logits_per_image)
+            
             #probs = logits_per_image.softmax(dim=-1) # [batch_size*seq_len, num_scenarios]
             probs = probs.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
             if flag:
