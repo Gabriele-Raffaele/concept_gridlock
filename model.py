@@ -163,7 +163,7 @@ class VTN(nn.Module):
             if flag:
                 logits_per_image = []
                 #main_dir = "/kaggle/input/road-logits"
-                main_dir = "/kaggle/input/road-logits_v2"
+                main_dir = "/kaggle/input/road-logits-v2"
                 for key in seq_key:
                     dir = f"{main_dir}/{key}.pt"
                     data = torch.load(dir)
