@@ -162,8 +162,8 @@ class VTN(nn.Module):
             s = img.shape#[batch_size, seq_len, h,w,c]
             if flag:
                 logits_per_image = []
-                main_dir = "/kaggle/input/road-logits"
-                #main_dir = "/kaggle/input/road-save/road-save/comma/cache/resnet50I3D512-Pkinetics-b4s8x1x1-commat3-h3x3x3/batch_concepts-30-08"
+                #main_dir = "/kaggle/input/road-logits"
+                main_dir = "/kaggle/input/road-logits_v2"
                 for key in seq_key:
                     dir = f"{main_dir}/{key}.pt"
                     data = torch.load(dir)
