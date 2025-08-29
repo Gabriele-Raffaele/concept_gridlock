@@ -187,7 +187,7 @@ class VTN(nn.Module):
                             break
                     
                     logits_per_image.append(data['concepts'][:, 1:])
-                logits_per_image = torch.cat(logits_per_image, dim=0)  
+                probs = torch.cat(logits_per_image, dim=0)  
                 
             if not flag:
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
