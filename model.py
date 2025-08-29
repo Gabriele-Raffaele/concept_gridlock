@@ -195,7 +195,7 @@ class VTN(nn.Module):
             #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
             
             #probs = logits_per_image.softmax(dim=-1) # [batch_size*seq_len, num_scenarios]
-            probs = probs.reshape((int(img.shape[0]), int(logits_per_image.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
+            probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
             if flag:
                 probs = probs.to(x.device, dtype=torch.float32)
             if not self.train_concepts: probs = probs.detach()
