@@ -157,7 +157,7 @@ class VTN(nn.Module):
         # we need to roll the previous sensor features, so that we do not include the step that we want to predict
         # we also substitude empty 0th entry then with 1st entry
         x = img
-        flag = True
+        flag = False
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
             if flag:

@@ -2,8 +2,8 @@ from torch.nn.utils.rnn import pad_sequence
 import numpy as np 
 import clip
 import random
-p = "/kaggle/working/concept_gridlock/scenarios/scenarios_road.txt"
-#p = "/kaggle/working/concept_gridlock/scenarios/scenarios_small_100.txt"
+#p = "/kaggle/working/concept_gridlock/scenarios/scenarios_road.txt"
+p = "/kaggle/working/concept_gridlock/scenarios/scenarios_small_100.txt"
 with open(p) as file:
     lines = [line.strip() for line in file]
 scenarios = lines
