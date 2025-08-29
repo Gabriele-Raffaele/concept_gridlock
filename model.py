@@ -153,11 +153,11 @@ class VTN(nn.Module):
             self.multitask_param_angle = nn.Parameter(torch.tensor([1.0]))
             self.multitask_param_dist = nn.Parameter(torch.tensor([1.0]))
 
-    def forward(self, img, angle, distance, vego, seq_key=None):
+    def forward(self, img, angle, distance, vego, seq_key):
         # we need to roll the previous sensor features, so that we do not include the step that we want to predict
         # we also substitude empty 0th entry then with 1st entry
         x = img
-        flag =False
+        flag = True
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
             if flag:
