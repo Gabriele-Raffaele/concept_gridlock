@@ -46,7 +46,11 @@ class LaneModule(pl.LightningModule):
             #ho messo logits[0] perchè il forward restituisce una tupla, prima era logits
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
             logits_angle, logits_dist, param_angle, param_dist = res[0]
+
+            print("distance pre mask:", distance)
             mask = distance.squeeze() == 0.0
+            print("distance post mask:", distance)
+
             #TODO: The intervention Boolean flag indicates whether 
             # a special type of supervision is being used in which:
             # • Instead of predicting the actual steering angle,
