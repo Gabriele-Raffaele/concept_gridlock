@@ -74,6 +74,8 @@ class LaneModule(pl.LightningModule):
             logits = res[0] if isinstance(res, tuple) else res
             ##(3) Poi si arriva qui in singletask -- G.V.
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
+            self.log_dict({"loss_inside_calcLoss_func": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+
             return loss
 
     def training_step(self, batch, batch_idx):
