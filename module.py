@@ -211,8 +211,12 @@ class LaneModule(pl.LightningModule):
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
                 loss = self.calculate_loss(((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 loss_angle, loss_dist, param_angle, param_dist = loss
+                print("loss_dist in tstStep before:", loss_dist)
+
                 param_angle, param_dist = 0.3, 0.7
                 loss = (param_angle * loss_angle) + (param_dist * loss_dist)
+                print("loss_dist in tstStep after:", loss_dist)
+                print("loss in tstStep after:", loss)
                 self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss_distance", loss_dist, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
