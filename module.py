@@ -57,17 +57,22 @@ class LaneModule(pl.LightningModule):
                 angle, distance = distance, angle
                 mask = distance.squeeze() == 0.0
                 loss_angle = self.bce_loss(sm(logits_angle.float()).squeeze()[~mask], angle.float().squeeze()[~mask])
+                
             loss_distance = torch.sqrt(self.loss(logits_dist.squeeze(), distance.squeeze(), mask))
+            ## La loss è calcolata allo stesso modo sia in multitask che in singletask -- G.V.
+            self.log_dict({"loss_distance_inside_calcLoss_func": loss_distance}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+            self.log_dict({"loss_angle_inside_calcLoss_func": loss_angle}, on_epoch=True, batch_size=self.bs,sync_dist=True)
+
             if loss_angle.isnan() or loss_distance.isnan():
                 print("ERROR")
+                
             loss = loss_angle, loss_distance
-            self.log_dict({"train_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs,sync_dist=True)
-            self.log_dict({"train_loss_distance": loss_distance}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             target = angle if self.multitask == "angle" else distance
             mask = distance.squeeze() == 0.0
             logits = res[0] if isinstance(res, tuple) else res
+            ##(3) Poi si arriva qui in singletask -- G.V.
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
             return loss
 
@@ -82,6 +87,7 @@ class LaneModule(pl.LightningModule):
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"val_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+            
         self.log_dict({"train_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
         return loss
 
@@ -183,6 +189,7 @@ class LaneModule(pl.LightningModule):
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
                         logits, attns = res
                         #print(f"DEBUG: logits={logits.shape}")
+                        ##(1) MA qui ci si entra quando si è in singletask  -- G.V. 
                         logits = logits[:, -1]
                         #print(f"DEBUG: logits={logits.shape}")
                         logits_all.append(logits)
@@ -201,6 +208,7 @@ class LaneModule(pl.LightningModule):
                 return (loss_angle, loss_dist)
             else:
                 logits_all = torch.stack(logits_all, dim=1)
+                #(2) Viene chiamata la calculate loss -- G.V 
                 loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)    
                 return loss
