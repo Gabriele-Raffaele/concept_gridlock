@@ -60,6 +60,7 @@ class LaneModule(pl.LightningModule):
                 
             loss_distance = torch.sqrt(self.loss(logits_dist.squeeze(), distance.squeeze(), mask))
             ## La loss è calcolata allo stesso modo sia in multitask che in singletask -- G.V.
+            print("loss_distance_inside_calcLoss_func:", loss_distance)
             self.log_dict({"loss_distance_inside_calcLoss_func": loss_distance}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"loss_angle_inside_calcLoss_func": loss_angle}, on_epoch=True, batch_size=self.bs,sync_dist=True)
 
