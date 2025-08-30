@@ -152,6 +152,8 @@ class LaneModule(pl.LightningModule):
         _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         res, probs = self(image_array, angle, distance, vego, seq_key)
         loss = self.calculate_loss(res, angle, distance)
+        print("loss in ValStep after_computed:", loss)
+
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
