@@ -271,9 +271,4 @@ class VTN(nn.Module):
             return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 
         else:
             res = (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions
-            try:
-                logits_angle = x[:,1:F+1,:].detach() if 'x' in locals() else None
-                logits_dist = x2[:,1:F+1,:].detach() if 'x2' in locals() else None
-            except Exception:
-                logits_angle, logits_dist = None, None
             return res, probs # we want to exclude the starting token since we don't have any previous knowledge about it 
