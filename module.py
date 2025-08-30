@@ -46,7 +46,6 @@ class LaneModule(pl.LightningModule):
             #ho messo logits[0] perchè il forward restituisce una tupla, prima era logits
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
             logits_angle, logits_dist, param_angle, param_dist = res[0]
-            print("logits_distance shape before squeeze:", logits_dist)
             mask = distance.squeeze() == 0.0
             #TODO: The intervention Boolean flag indicates whether 
             # a special type of supervision is being used in which:
@@ -75,7 +74,6 @@ class LaneModule(pl.LightningModule):
             mask = distance.squeeze() == 0.0
             logits = res[0] if isinstance(res, tuple) else res
             ##(3) Poi si arriva qui in singletask -- G.V.
-            print("logits_distance shape before squeeze:", logits)
 
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
             print("loss distance in calculate loss:", loss)
@@ -95,7 +93,7 @@ class LaneModule(pl.LightningModule):
             loss = (param_angle * loss_angle) + (param_dist * loss_dist) 
             print("loss distance in trainStep after:", loss_dist)
             print("loss in trainStep after:", loss)
-
+            
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"val_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             
