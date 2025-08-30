@@ -87,7 +87,11 @@ class LaneModule(pl.LightningModule):
             loss_angle, loss_dist, param_angle, param_dist = loss
             #0.3 and 0.7 hyperparameters used to give more importance to distance prediction than angle prediction -G.R.
             param_angle, param_dist = 0.3, 0.7
-            loss = (param_angle * loss_angle) + (param_dist * loss_dist)
+            print("loss distance in trainStep before:", loss_dist)
+            loss = (param_angle * loss_angle) + (param_dist * loss_dist) 
+            print("loss distance in trainStep after:", loss_dist)
+            print("loss in trainStep after:", loss)
+
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"val_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             
@@ -151,7 +155,11 @@ class LaneModule(pl.LightningModule):
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
+            print("loss distance in ValStep before:", loss_dist)
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
+            print("loss distance in ValStep after:", loss_dist)
+            print("loss in ValStep after:", loss)
+
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"val_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
         self.log_dict({"val_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
