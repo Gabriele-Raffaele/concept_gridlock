@@ -84,6 +84,10 @@ class LaneModule(pl.LightningModule):
     def training_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         res, probs = self(image_array, angle, distance, vego, seq_key)
+        # confronta range e scala: gli angle sono in gradi (piccoli), distance in metri (più grandi)
+        print("angle summary in TrainStep:", angle.min().item(), angle.max().item(), angle.mean().item())
+        print("distance summary in TrainStep:", distance.min().item(), distance.max().item(), distance.mean().item())
+
         loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
@@ -153,6 +157,9 @@ class LaneModule(pl.LightningModule):
     def validation_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         res, probs = self(image_array, angle, distance, vego, seq_key)
+        print("angle summary in VAlStep:", angle.min().item(), angle.max().item(), angle.mean().item())
+        print("distance summary in VAlStep:", distance.min().item(), distance.max().item(), distance.mean().item())
+
         loss = self.calculate_loss(res, angle, distance)
         print("loss in ValStep after_computed:", loss)
 
