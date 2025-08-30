@@ -87,7 +87,7 @@ class CommaDataset(Dataset):
         if self.return_full: 
             return images_cropped,  sequences['vEgo'],  sequences['angle'], distances, np.array(sequences['gaspressed']).astype(bool),  np.array(sequences['brakepressed']).astype(bool) , np.array(sequences['CruiseStateenabled']).astype(bool), seq_key
         if self.multitask == "distance":
-            res = images_cropped, images_cropped, sequences['vEgo'], distances, sequences['angle'], seq_key
+            res = images_cropped, images_cropped, sequences['vEgo'], sequences['angle'], distances, seq_key
         if self.multitask == "intervention":
             res = images_cropped, images_cropped, sequences['vEgo'], distances, torch.tensor(np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool)), seq_key
         return res
