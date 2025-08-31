@@ -61,8 +61,6 @@ class LaneModule(pl.LightningModule):
                 loss_angle = self.bce_loss(sm(logits_angle.float()).squeeze()[~mask], angle.float().squeeze()[~mask])
                 
             loss_distance = torch.sqrt(self.loss(logits_dist.squeeze(), distance.squeeze(), mask))
-            ## La loss è calcolata allo stesso modo sia in multitask che in singletask -- G.V.
-            print("loss_distance_inside_calcLoss_func:", loss_distance)
             self.log_dict({"loss_distance_inside_calcLoss_func": loss_distance}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"loss_angle_inside_calcLoss_func": loss_angle}, on_epoch=True, batch_size=self.bs,sync_dist=True)
 
@@ -75,10 +73,8 @@ class LaneModule(pl.LightningModule):
             target = angle if self.multitask == "angle" else distance
             mask = distance.squeeze() == 0.0
             logits = res[0] if isinstance(res, tuple) else res
-            ##(3) Poi si arriva qui in singletask -- G.V.
 
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
-            print("loss distance in calculate loss:", loss)
             self.log_dict({"loss_inside_calcLoss_func": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
 
             return loss
@@ -94,10 +90,7 @@ class LaneModule(pl.LightningModule):
             loss_angle, loss_dist, param_angle, param_dist = loss
             #0.3 and 0.7 hyperparameters used to give more importance to distance prediction than angle prediction -G.R.
             param_angle, param_dist = 0.3, 0.7
-            print("loss distance in trainStep before:", loss_dist)
             loss = (param_angle * loss_angle) + (param_dist * loss_dist) 
-            print("loss distance in trainStep after:", loss_dist)
-            print("loss in trainStep after:", loss)
             
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"val_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
@@ -160,15 +153,11 @@ class LaneModule(pl.LightningModule):
         res, probs = self(image_array, angle, distance, vego, seq_key)
     
         loss = self.calculate_loss(res, angle, distance)
-        print("loss in ValStep after_computed:", loss)
 
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
-            print("loss distance in ValStep before:", loss_dist)
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
-            print("loss distance in ValStep after:", loss_dist)
-            print("loss in ValStep after:", loss)
 
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"val_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
@@ -221,12 +210,10 @@ class LaneModule(pl.LightningModule):
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
                 loss = self.calculate_loss(((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 loss_angle, loss_dist, param_angle, param_dist = loss
-                print("loss_dist in tstStep before:", loss_dist)
 
                 param_angle, param_dist = 0.3, 0.7
                 loss = (param_angle * loss_angle) + (param_dist * loss_dist)
-                print("loss_dist in tstStep after:", loss_dist)
-                print("loss in tstStep after:", loss)
+
                 self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss_distance", loss_dist, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
