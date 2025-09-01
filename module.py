@@ -262,20 +262,27 @@ class LaneModule(pl.LightningModule):
                 logits_all = torch.stack(logits_all, dim=1)
                 #(2) Viene chiamata la calculate loss -- G.V 
                 loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
-                self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)    
+                self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)   
+                loss_mae = self.calculate_mae_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]) 
+                self.log("test_loss_mae", loss_mae, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 return loss
 
         _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
         res, probs = self(image_array, angle, distance, vego, seq_key)
         loss = self.calculate_loss(res, angle, distance)
+        loss_mae = self.calculate_mae_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             param_angle, param_dist = 0.3, 0.7
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
             self.log_dict({"test_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"test_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+            loss_angle_mae, loss_distance_mae, param_angle, param_dist = loss_mae
+            self.log_dict({"test_loss_angle_mae": loss_angle_mae}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+            self.log_dict({"test_loss_distance_mae": loss_distance_mae}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             return (loss_angle, loss_dist)
         self.log_dict({"test_loss": loss}, on_epoch=True, batch_size=self.bs, sync_dist=True)
+        self.log_dict({"test_loss_mae": loss_mae}, on_epoch=True, batch_size=self.bs, sync_dist=True)
         return loss
     #------------------------------------------------------------
 
