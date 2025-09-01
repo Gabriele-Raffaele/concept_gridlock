@@ -216,7 +216,7 @@ def main():
         result_dir = os.path.dirname(ckpt_path)
         with open(f"{result_dir}/test_metrics.json", "w") as f:
             json.dump(test_results, f, indent=4)
-        '''
+        
         preds = test_trainer.predict(module, ckpt_path=ckpt_path)
         #save_path =  "."
         for pred in preds:
@@ -234,6 +234,6 @@ def main():
                 (preds_angle, preds_dist, param_angle, param_dist), attention = res
                 save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working", module.time_horizon)
                 save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working", module.time_horizon)
-            '''
+            
 if __name__ == "__main__":
     main()
