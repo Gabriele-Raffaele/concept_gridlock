@@ -31,13 +31,55 @@ class LaneModule(pl.LightningModule):
 
     def forward(self, x, angle, distance, vego, seq_key):
         return self.model(x, angle, distance, vego, seq_key)
+    
+    def mae_loss(self, input, target, mask):
+        input = input.float()
+        target = target.float()
+        out = torch.abs(input[~mask] - target[~mask])
+        return out.mean()
 
     def mse_loss(self, input, target, mask, reduction="mean"):
         input = input.float()
         target = target.float()
-
         out = (input[~mask]-target[~mask])**2
         return out.mean() if reduction == "mean" else out 
+    
+    def calculate_mae_loss(self, res, angle, distance):
+        
+        if self.multitask == "multitask":
+            
+            # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
+            logits_angle, logits_dist, param_angle, param_dist = res[0]
+
+            mask_distance = distance.squeeze() == 0.0
+            mask_angle = angle.squeeze() == 0.0
+            #TODO: The intervention Boolean flag indicates whether 
+            # a special type of supervision is being used in which:
+            # • Instead of predicting the actual steering angle,
+            # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
+            if not self.intervention:
+                loss_angle = self.mae_loss(logits_angle.squeeze(), angle.squeeze(), mask_angle)
+            else: 
+                sm = nn.Softmax(dim=1)
+                angle, distance = distance, angle
+                mask = distance.squeeze() == 0.0
+                loss_angle = self.bce_loss(sm(logits_angle.float()).squeeze()[~mask], angle.float().squeeze()[~mask])
+            #RMSE (root-mean-square error) -G.R.
+            loss_distance = self.mae_loss(logits_dist.squeeze(), distance.squeeze(), mask_distance)
+
+            if loss_angle.isnan() or loss_distance.isnan():
+                print("ERROR")
+                
+            loss = loss_angle, loss_distance
+            return loss_angle, loss_distance, param_angle, param_dist
+        else:
+            target = angle if self.multitask == "angle" else distance
+            mask = target.squeeze() == 0.0
+
+            logits = res[0] if isinstance(res, tuple) else res
+            #RMSE (root-mean-square error) -G.R.
+            loss = self.mae_loss(logits.squeeze(), target.squeeze(), mask)
+            return loss
 
     def calculate_loss(self, res, angle, distance):
         
@@ -69,7 +111,7 @@ class LaneModule(pl.LightningModule):
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             target = angle if self.multitask == "angle" else distance
-            mask = distance.squeeze() == 0.0
+            mask = target.squeeze() == 0.0
             logits = res[0] if isinstance(res, tuple) else res
             #RMSE (root-mean-square error) -G.R.
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
@@ -83,8 +125,7 @@ class LaneModule(pl.LightningModule):
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
             #0.3 and 0.7 hyperparameters used to give more importance to distance prediction than angle prediction -G.R.
-            #param_angle, param_dist = 0.3, 0.7
-            print(f"param_angle: {param_angle}, param_dist: {param_dist}")
+            param_angle, param_dist = 0.3, 0.7
             loss = (param_angle * loss_angle) + (param_dist * loss_dist) 
             
             self.log_dict({"train_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
@@ -151,7 +192,7 @@ class LaneModule(pl.LightningModule):
 
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
-            #param_angle, param_dist = 0.3, 0.7
+            param_angle, param_dist = 0.3, 0.7
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
 
             self.log_dict({"val_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
@@ -205,10 +246,14 @@ class LaneModule(pl.LightningModule):
                 logits_distance_all = torch.stack(logits_distance_all, dim=1)
                 loss = self.calculate_loss(((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 loss_angle, loss_dist, param_angle, param_dist = loss
-
-                #param_angle, param_dist = 0.3, 0.7
+                param_angle, param_dist = 0.3, 0.7
                 loss = (param_angle * loss_angle) + (param_dist * loss_dist)
-
+                loss_mae = self.calculate_mae_loss(((logits_angle_all, logits_distance_all, param_angle, param_dist), attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
+                loss_angle_mae, loss_distance_mae, param_angle, param_dist = loss_mae
+                loss_mae = (param_angle * loss_angle_mae) + (param_dist * loss_distance_mae)
+                self.log("test_loss_dist_mae", loss_distance_mae, on_epoch=True, batch_size=self.bs, sync_dist=True)
+                self.log("test_loss_angle_mae", loss_angle_mae, on_epoch=True, batch_size=self.bs, sync_dist=True)
+                self.log("test_loss_mae", loss_mae, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss_angle", loss_angle, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss_distance", loss_dist, on_epoch=True, batch_size=self.bs, sync_dist=True)
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)
@@ -225,7 +270,7 @@ class LaneModule(pl.LightningModule):
         loss = self.calculate_loss(res, angle, distance)
         if self.multitask == "multitask":
             loss_angle, loss_dist, param_angle, param_dist = loss
-            #param_angle, param_dist = 0.3, 0.7
+            param_angle, param_dist = 0.3, 0.7
             loss = (param_angle * loss_angle) + (param_dist * loss_dist)
             self.log_dict({"test_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
             self.log_dict({"test_loss_angle": loss_angle}, on_epoch=True, batch_size=self.bs, sync_dist=True)

@@ -162,7 +162,6 @@ class VTN(nn.Module):
             s = img.shape#[batch_size, seq_len, h,w,c]
             if flag:
                 logits_per_image = []
-                #main_dir = "/kaggle/input/road-logits"
                 main_dir = "/kaggle/input/road-logits"
                 for key in seq_key:
                     dir = f"{main_dir}/{key}.pt"
