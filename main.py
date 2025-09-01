@@ -31,7 +31,8 @@ def save_preds(logits, target, save_name, p, time_horizon=1):
     df = pd.DataFrame()
     df['logits'] = logits_reshaped.tolist()
     df['target'] = target.squeeze().reshape(b*s).tolist()
-    df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=False)
+    write_header = not os.path.exists(f'{p}/{save_name}.csv')
+    df.to_csv(f'{p}/{save_name}.csv', mode='a', index=False, header=write_header)
     print(f"Saved predictions to {p}/{save_name}.csv")
 
 def get_arg_parser():
