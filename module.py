@@ -84,6 +84,7 @@ class LaneModule(pl.LightningModule):
             loss_angle, loss_dist, param_angle, param_dist = loss
             #0.3 and 0.7 hyperparameters used to give more importance to distance prediction than angle prediction -G.R.
             #param_angle, param_dist = 0.3, 0.7
+            print(f"param_angle: {param_angle}, param_dist: {param_dist}")
             loss = (param_angle * loss_angle) + (param_dist * loss_dist) 
             
             self.log_dict({"train_loss_dist": loss_dist}, on_epoch=True, batch_size=self.bs, sync_dist=True)
