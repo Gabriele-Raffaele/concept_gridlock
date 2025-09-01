@@ -75,6 +75,8 @@ class CommaDataset(Dataset):
         images = sequences['image']
         images = images[:,0:160, :,:]#crop the image to remove the view of the inside car console
         images = images.permute(0,3,1,2)
+        print("DEBUG DATALOADER: SEQ_KEY= ", seq_key)
+
         if not self.return_full:
             images = self.normalize(images/255.0)
             
@@ -87,7 +89,6 @@ class CommaDataset(Dataset):
         if self.return_full: 
             return images_cropped,  sequences['vEgo'],  sequences['angle'], distances, np.array(sequences['gaspressed']).astype(bool),  np.array(sequences['brakepressed']).astype(bool) , np.array(sequences['CruiseStateenabled']).astype(bool), seq_key
         if self.multitask == "distance":
-            print("DEBUG: SEQ_KEY in dataloader= ", seq_key)
             res = images_cropped, images_cropped, sequences['vEgo'], sequences['angle'], distances, seq_key
         if self.multitask == "intervention":
             res = images_cropped, images_cropped, sequences['vEgo'], distances, torch.tensor(np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool)), seq_key
