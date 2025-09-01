@@ -52,6 +52,7 @@ class CommaDataset(Dataset):
         seq_key  = self.keys[idx]
         keys_ = self.h5_file[seq_key].keys()#'angle', 'brake', 'dist', 'gas', 'image', 'time', 'vEgo'
         file = self.h5_file
+        print("DEBUG DATALOADER (1): SEQ_KEY= ", seq_key)
         
         for key in keys_:                        
             seq = file[seq_key][key][()]
