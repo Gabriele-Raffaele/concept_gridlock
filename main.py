@@ -66,6 +66,9 @@ def get_arg_parser():
 def main():    
     torch.cuda.empty_cache()
     os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:50"
+    
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
 
     if torch.cuda.device_count() > 0 and torch.cuda.get_device_capability()[0] >= 7:
         # Set the float32 matrix multiplication precision to 'high'
