@@ -78,7 +78,11 @@ def main():
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         model.to(device)
     '''
-
+    # Aggiorna n_scenarios in base alla sorgente dei concetti
+    if args.concept_source == "clip":
+        args.n_scenarios = 100
+    else:  # retinanet
+        args.n_scenarios = 148
     parser = get_arg_parser()
     args = parser.parse_args()
     task = args.task

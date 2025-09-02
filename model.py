@@ -91,6 +91,7 @@ class VTN(nn.Module):
         self.clip_model.eval()
         self.concept_features = concept_features
         self.backbone_name = backbone
+        (scenarios, scenarios_tokens) = get_scenarios(self.concept_source)
 
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
 
@@ -159,7 +160,6 @@ class VTN(nn.Module):
         # we also substitude empty 0th entry then with 1st entry
         x = img
         if self.concept_features:
-            (scenarios, scenarios_tokens) = get_scenarios(self.concept_source)
             s = img.shape#[batch_size, seq_len, h,w,c]
             if self.concept_source == "retinanet":
                 logits_per_image = []
