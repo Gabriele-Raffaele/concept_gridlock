@@ -162,6 +162,7 @@ class VTN(nn.Module):
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
             if self.concept_source == "retinanet":
+                
                 logits_per_image = []
                 main_dir = "/kaggle/input/road-logits"
                 for key in seq_key:
@@ -187,6 +188,7 @@ class VTN(nn.Module):
                             break
                     
                     logits_per_image.append(data['concepts'][:, 1:])
+                print("using retinanet features")
                 probs = torch.cat(logits_per_image, dim=0)  
                 
             elif self.concept_source == "clip":
@@ -194,7 +196,7 @@ class VTN(nn.Module):
                 probs = torch.sigmoid(logits_per_image)
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            if self.concept_source == "retinanet":\
+            if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
             if not self.train_concepts: probs = probs.detach()
 
