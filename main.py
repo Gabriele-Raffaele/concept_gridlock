@@ -59,6 +59,7 @@ def get_arg_parser():
     parser.add_argument('-checkpoint_path', default='', type=str)
     parser.add_argument('-time_horizon', default=1, type=int, help="Time horizon for predictions")
     parser.add_argument('-concept_source', default="retinanet", type=str,choices=["clip", "retinanet"], help="Source of concept logits: clip or retinanet")
+    parser.add_argument('-seed', default=42, type=int)
     return parser
 
 
@@ -88,6 +89,8 @@ def main():
         args.n_scenarios = 100
     else:  # retinanet
         args.n_scenarios = 148
+    
+    pl.seed_everything(args.seed, workers=True)
     print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}, CONCEPT_SOURCE = {args.concept_source}")
     #EarlyStopping: stop training when val_loss_accumulated does not improve
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
