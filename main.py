@@ -116,7 +116,7 @@ def main():
                         time_horizon=args.time_horizon
                         )
     #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
-    ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
+    ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
     path = ckpt_pth + "/lightning_logs/" 
     if not os.path.exists(path):
         os.makedirs(path)
@@ -201,7 +201,7 @@ def main():
         #ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
         #Build checkpoint path -G.R.
         if args.checkpoint_path == '':
-            ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}"
+            ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
             #find the latest version -G.R.
             versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
             if not versions:
@@ -229,15 +229,15 @@ def main():
                 
                 prediction, attention = res
                 if args.task == "angle":
-                    save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working", module.time_horizon)
+                    save_preds(prediction, preds_1, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}_{args.concept_source}", "/kaggle/working", module.time_horizon)
                 else:
-                    save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}", "/kaggle/working", module.time_horizon)
+                    save_preds(prediction, preds_2, f"{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.n_scenarios}_{args.concept_source}", "/kaggle/working", module.time_horizon)
 
             else:
                 res, angle, dist = pred[0], pred[1], pred[2]
                 (preds_angle, preds_dist, param_angle, param_dist), attention = res
-                save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working", module.time_horizon)
-                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}", "/kaggle/working", module.time_horizon)
-            
+                save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)
+                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)
+
 if __name__ == "__main__":
     main()
