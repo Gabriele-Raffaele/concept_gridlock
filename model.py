@@ -75,7 +75,7 @@ class VTN(nn.Module):
     https://arxiv.org/abs/2102.00719
     """
 
-    def __init__(self, multitask="multitask", backbone="none", device="cuda:1", multitask_param=True, concept_features=True, train_concepts=True, return_concepts=True, concept_source="retinanet"):
+    def __init__(self, multitask="multitask", backbone="none", device="cuda:1", multitask_param=True, concept_features=True, train_concepts=False, return_concepts=True, concept_source="retinanet"):
         super(VTN, self).__init__()
         self.device = device
         self.return_concepts = return_concepts
