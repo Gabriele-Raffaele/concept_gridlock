@@ -318,7 +318,7 @@ class LaneModule(pl.LightningModule):
         return self.get_dataloader(dataset_type="test")
 
     def configure_optimizers(self):
-        g_opt = torch.optim.Adam(self.model.parameters(), lr=1e-5, weight_decay=1e-5)
+        g_opt = torch.optim.Adam(self.model.parameters(), lr=1e-4, weight_decay=1e-5)
         return g_opt
 
     def get_dataloader(self, dataset_type):
