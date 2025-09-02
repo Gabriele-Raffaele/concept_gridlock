@@ -1,8 +1,6 @@
 import pytorch_lightning as pl
 import torch
-from dataloader import *
 from dataloader_comma import *
-from dataloader_nuscenes import * 
 from torch.utils.data import DataLoader
 from torch.nn import functional as F
 import torch.nn as nn 
@@ -324,10 +322,5 @@ class LaneModule(pl.LightningModule):
         return g_opt
 
     def get_dataloader(self, dataset_type):
-        if self.dataset == "once":
-            ds = ONCEDataset(dataset_type=dataset_type, multitask=self.multitask) 
-        elif self.dataset == "comma":
-            ds = CommaDataset(dataset_type=dataset_type, multitask=self.multitask if not self.intervention else "intervention", ground_truth=self.ground_truth, dataset_path=self.dataset_path, dataset_fraction=self.dataset_fraction)
-        elif self.dataset == 'nuscenes':
-            ds = NUScenesDataset(dataset_type=dataset_type, multitask=self.multitask if not self.intervention else "intervention", ground_truth=self.ground_truth, max_len=20, dataset_path=self.dataset_path, dataset_fraction=self.dataset_fraction)
+        ds = CommaDataset(dataset_type=dataset_type, multitask=self.multitask if not self.intervention else "intervention", ground_truth=self.ground_truth, dataset_path=self.dataset_path, dataset_fraction=self.dataset_fraction)
         return DataLoader(ds, batch_size=self.bs, num_workers=self.num_workers, collate_fn=pad_collate)

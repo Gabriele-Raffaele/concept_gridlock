@@ -88,7 +88,7 @@ def main():
         args.n_scenarios = 100
     else:  # retinanet
         args.n_scenarios = 148
-    print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}")
+    print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}, CONCEPT_SOURCE = {args.concept_source}")
     #EarlyStopping: stop training when val_loss_accumulated does not improve
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
                                         min_delta=0.05, 
