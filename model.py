@@ -109,7 +109,7 @@ class VTN(nn.Module):
             num_attention_heads=5 if not concept_features else 6
             mlp_size = 512+additional_feat_size #image feature size + previous sensor feature size 
         elif backbone == "none" and concept_features:
-            print("using concept features")
+            print("Using concept features")
             embed_dim = len(scenarios)+3
             num_attention_heads=1
             mlp_size = len(scenarios)+3
@@ -188,7 +188,7 @@ class VTN(nn.Module):
                             break
                     
                     logits_per_image.append(data['concepts'][:, 1:])
-                print("using retinanet features")
+                
                 probs = torch.cat(logits_per_image, dim=0)  
                 
             elif self.concept_source == "clip":
