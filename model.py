@@ -92,7 +92,7 @@ class VTN(nn.Module):
         self.concept_features = concept_features
         self.backbone_name = backbone
         (scenarios, scenarios_tokens) = get_scenarios(self.concept_source)
-
+        self.scenarios_tokens = scenarios_tokens
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
 
         if backbone == "vit":
@@ -182,7 +182,7 @@ class VTN(nn.Module):
 
                         if not found:
                             print(f"❌ None found with video_name = {key}, skipping to CLIP")
-                            logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+                            logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
                             probs = torch.sigmoid(logits_per_image)
                             break
                     
@@ -190,11 +190,11 @@ class VTN(nn.Module):
                 probs = torch.cat(logits_per_image, dim=0)  
                 
             elif self.concept_source == "clip":
-                logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+                logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
                 probs = torch.sigmoid(logits_per_image)
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            if self.concept_source == "retinanet":
+            if self.concept_source == "retinanet":\
                 probs = probs.to(x.device, dtype=torch.float32)
             if not self.train_concepts: probs = probs.detach()
 
