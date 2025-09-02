@@ -58,6 +58,7 @@ def get_arg_parser():
     parser.add_argument('-dev_run', default=False, type=bool) 
     parser.add_argument('-checkpoint_path', default='', type=str)
     parser.add_argument('-time_horizon', default=1, type=int, help="Time horizon for predictions")
+    parser.add_argument('-concept_source', default="retinanet", type=str,choices=["clip", "retinanet"], help="Source of concept logits: clip or retinanet")
     return parser
 
 
@@ -94,7 +95,8 @@ def main():
                 backbone=args.backbone, 
                 concept_features=args.concept_features, 
                 device = f"cuda:{args.gpu_num}", 
-                train_concepts=args.train_concepts)
+                train_concepts=args.train_concepts,
+                concept_source=args.concept_source)
 
     #Wrapper that links the model to data, loss and optimizer
     module = LaneModule(model, 

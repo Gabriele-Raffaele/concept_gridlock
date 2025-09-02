@@ -75,12 +75,13 @@ class VTN(nn.Module):
     https://arxiv.org/abs/2102.00719
     """
 
-    def __init__(self, multitask="multitask", backbone="none", device="cuda:1", multitask_param=True, concept_features=True, train_concepts=True, return_concepts=True):
+    def __init__(self, multitask="multitask", backbone="none", device="cuda:1", multitask_param=True, concept_features=True, train_concepts=True, return_concepts=True, concept_source="retinanet"):
         super(VTN, self).__init__()
         self.device = device
         self.return_concepts = return_concepts
         self.train_concepts = train_concepts
-    
+        self.concept_source = concept_source
+
         self._construct_network(multitask, backbone, multitask_param, concept_features)
 
     def _construct_network(self, multitask, backbone, multitask_param, concept_features):
@@ -157,10 +158,10 @@ class VTN(nn.Module):
         # we need to roll the previous sensor features, so that we do not include the step that we want to predict
         # we also substitude empty 0th entry then with 1st entry
         x = img
-        flag = False
         if self.concept_features:
+            (scenarios, scenarios_tokens) = get_scenarios(self.concept_source)
             s = img.shape#[batch_size, seq_len, h,w,c]
-            if flag:
+            if self.concept_source == "retinanet":
                 logits_per_image = []
                 main_dir = "/kaggle/input/road-logits"
                 for key in seq_key:
@@ -181,21 +182,19 @@ class VTN(nn.Module):
 
                         if not found:
                             print(f"❌ None found with video_name = {key}, skipping to CLIP")
-                            #TODO: Insert code to handle missing video_name
                             logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
+                            probs = torch.sigmoid(logits_per_image)
                             break
                     
                     logits_per_image.append(data['concepts'][:, 1:])
                 probs = torch.cat(logits_per_image, dim=0)  
                 
-            if not flag:
+            elif self.concept_source == "clip":
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), scenarios_tokens.to(x.device))
                 probs = torch.sigmoid(logits_per_image)
-            #TODO: VERIFICARE SE QUA BISOGNA CAMBIARE SOFTMAX CON una di quelle segnate. (SOFTMAX REPLACE (2) )
             
-            #probs = logits_per_image.softmax(dim=-1) # [batch_size*seq_len, num_scenarios]
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            if flag:
+            if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
             if not self.train_concepts: probs = probs.detach()
 
@@ -219,9 +218,6 @@ class VTN(nn.Module):
 
         #concatenate the sensor features 
         if self.concept_features:
-            #added -G.R.
-            if flag:
-                probs = probs.to(x.device, dtype=torch.float32)
             x = torch.cat([x, probs], dim=-1) if self.backbone_name != 'none' else probs
         x = torch.cat((x, angle.unsqueeze(-1)), dim=-1)
         x = torch.cat((x, distance.unsqueeze(-1)), dim=-1)
