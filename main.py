@@ -79,13 +79,15 @@ def main():
         model.to(device)
     '''
     # Aggiorna n_scenarios in base alla sorgente dei concetti
+    
+    parser = get_arg_parser()
+    args = parser.parse_args()
+    task = args.task
+    
     if args.concept_source == "clip":
         args.n_scenarios = 100
     else:  # retinanet
         args.n_scenarios = 148
-    parser = get_arg_parser()
-    args = parser.parse_args()
-    task = args.task
     print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}")
     #EarlyStopping: stop training when val_loss_accumulated does not improve
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
