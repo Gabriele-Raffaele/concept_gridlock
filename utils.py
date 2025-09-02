@@ -3,7 +3,7 @@ import numpy as np
 import clip
 import random
 
-def get_logits_path(concept_source: str) -> str:
+def get_scenarios(concept_source: str) -> str:
     if concept_source == "retinanet":
         p = "/kaggle/working/concept_gridlock/scenarios/scenarios_road.txt"
         with open(p) as file:
