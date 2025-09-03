@@ -1,36 +1,42 @@
 import h5py
 import numpy as np
-import matplotlib.pyplot as plt
-file_path = "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/venv/concept_gridlock/filtered_chunk1_train.hdf5"
-#file_path = "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/venv/concept_gridlock/filtered_chunk1_test.hdf5"
-#file_path = "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/venv/concept_gridlock/filtered_chunk1_val.hdf5"
-  
-zero_counts = []
-video_ids = []
 
-with h5py.File(file_path, "r") as f:
+def add_gaussian_noise_to_array(arr, sigma, seed=None):
+    """
+    arr: numpy array float32 in [0,1], shape (seq_len, H, W, C) o simile
+    sigma: deviazione standard del rumore
+    seed: opzionale per riproducibilità
+    """
+    if seed is not None:
+        rng = np.random.RandomState(seed)
+        noise = rng.normal(loc=0.0, scale=sigma, size=arr.shape).astype(np.float32)
+    else:
+        noise = np.random.normal(loc=0.0, scale=sigma, size=arr.shape).astype(np.float32)
+    noisy = arr + noise
+    noisy = np.clip(noisy, 0.0, 1.0)
+    return noisy
+
+# --- Parametri ---
+file_path = "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/venv/concept_gridlock/filtered_chunk1_test.hdf5"
+sigma = 0.08   # deviazione standard del rumore
+seed = 42      # opzionale, per riproducibilità
+
+with h5py.File(file_path, "r+") as f:  # "r+" per lettura/scrittura
     for video_id in f.keys():
         group = f[video_id]
-        if "dist" in group:   # usa "distance" se è la chiave corretta
-            distances = group["dist"][:].flatten()
-            zero_count = np.sum(distances == 0.0)
-            zero_counts.append(zero_count)
-            video_ids.append(video_id)
+        if "image" in group:  # usa la chiave corretta dei frame
+            frames = group["image"][:]  # copia in memoria
+            # Normalizziamo se necessario (dipende dal file)
+            frames_float = frames.astype(np.float32) / 255.0
 
-# statistiche
-zero_counts = np.array(zero_counts)
-avg_zeros = zero_counts.mean()
-min_zeros = zero_counts.min()
-max_zeros = zero_counts.max()
-video_max = video_ids[zero_counts.argmax()]
+            # applichiamo rumore
+            noisy_frames = add_gaussian_noise_to_array(frames_float, sigma, seed=seed)
 
-print(f"Numero medio di valori == 0.0 per video: {avg_zeros:.2f}")
-print(f"Minimo: {min_zeros}, Massimo: {max_zeros} (video {video_max})")
+            # rimappiamo a uint8
+            noisy_frames_u8 = (noisy_frames * 255.0).round().astype(np.uint8)
 
-# grafico
-plt.figure(figsize=(12, 6))
-plt.bar(range(len(video_ids)), zero_counts)
-plt.xlabel("Video index")
-plt.ylabel("Count di distance == 0.0")
-plt.title("Numero di valori 0.0 per video")
-plt.show()
+            # sovrascriviamo il dataset
+            del group["image"]  # eliminiamo quello vecchio
+            group.create_dataset("image", data=noisy_frames_u8, compression="gzip")
+
+print("Fatto: tutti i frame hanno ricevuto rumore Gaussian.")

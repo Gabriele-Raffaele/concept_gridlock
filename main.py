@@ -127,7 +127,8 @@ def main():
     if not os.path.exists(path):
         os.makedirs(path)
     checkpoint_callback = ModelCheckpoint(save_top_k=2, 
-                                            monitor="val_loss_accumulated")
+                                            monitor="val_loss_accumulated",
+                                            save_last=True)
 
     vs = os.listdir(path)
     filt = [elem for elem in vs if 'version' in elem]
