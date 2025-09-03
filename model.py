@@ -92,6 +92,7 @@ class VTN(nn.Module):
         self.concept_features = concept_features
         self.backbone_name = backbone
         (scenarios, scenarios_tokens) = get_scenarios(self.concept_source)
+        print(f"Using {len(scenarios)} scenarios")
         self.scenarios_tokens = scenarios_tokens
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
 
@@ -151,6 +152,20 @@ class VTN(nn.Module):
                 nn.Dropout(0.5),
                 nn.Linear(mlp_size, num_classes)
             )
+        self.mlp_head_distance = nn.Sequential(
+            nn.LayerNorm(mlp_size),
+            nn.Linear(mlp_size, mlp_size),
+            nn.ReLU(),
+            nn.Dropout(0.5),
+            nn.Linear(mlp_size, num_classes)
+        )
+        #xavier initialization for distance mlp head
+        for m in self.mlp_head_distance.modules():
+            if isinstance(m, nn.Linear):
+                nn.init.xavier_uniform_(m.weight)
+                if m.bias is not None:
+                    nn.init.zeros_(m.bias)
+
         if self.multitask and self.multitask_param:
             self.multitask_param_angle = nn.Parameter(torch.tensor([1.0]))
             self.multitask_param_dist = nn.Parameter(torch.tensor([1.0]))
