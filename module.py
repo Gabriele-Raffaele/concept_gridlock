@@ -110,6 +110,8 @@ class LaneModule(pl.LightningModule):
             logits = res[0] if isinstance(res, tuple) else res
             #RMSE (root-mean-square error) -G.R.
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
+            if loss.isnan():
+                print("ERROR")
             return loss
 
     def training_step(self, batch, batch_idx):
