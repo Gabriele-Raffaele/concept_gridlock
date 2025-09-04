@@ -153,7 +153,7 @@ def main():
     if version is not None:
         resume_path = os.path.join(path, f"version_{version}", "checkpoints")
         if os.path.exists(resume_path):
-            files = [f for f in os.listdir(resume_path) if f.endswith(".ckpt") and f.startswith("epoch=")]
+            files = [f for f in os.listdir(resume_path) if f.endswith(".ckpt") and f.startswith("epoch")]
             print(f"Found existing version: {version}, files: {files}")
 
             if files:
