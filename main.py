@@ -156,9 +156,9 @@ def main():
             files = [f for f in os.listdir(resume_path) if f.endswith(".ckpt") and f.startswith("epoch=")]
 
             if files:
-                # estrai la loss dal nome usando regex
+                
                 def get_loss_from_name(fname):
-                    match = re.search(r"val_loss=([\d\.]+)", fname)
+                    match = re.search(r"val_loss_accumulated=([\d\.]+)", fname)
                     return float(match.group(1)) if match else float("inf")
 
                 best_ckpt = min(files, key=get_loss_from_name)
