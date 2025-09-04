@@ -211,13 +211,17 @@ class VTN(nn.Module):
                 probs = torch.sigmoid(logits_per_image)
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            
+            probs = probs.to(x.device, dtype=torch.float32)
+            print("⚠️ probs shape:", probs.shape)
+            print("⚠️ probs sample:", probs[0, :5, :]) 
+            '''
             if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
             elif self.concept_source == "clip":
                 probs = probs.to(x.device, dtype=torch.float32)
-            
-            if not self.train_concepts: probs = probs.detach()
+            '''
+            if not self.train_concepts: 
+                probs = probs.detach()
 
         angle = torch.roll(angle, shifts=1, dims=1)
         angle[:,0] = angle[:,1]
