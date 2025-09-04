@@ -159,7 +159,7 @@ def main():
             if files:
                 
                 def get_loss_from_name(fname):
-                    match = re.search(r"val_loss_accumulated[=]?([\d\.]+)", fname)
+                    match = re.search(r"val_loss_accumulated[=]?(\d+\.\d+)", fname)
                     return float(match.group(1)) if match else float("inf")
 
                 best_ckpt = min(files, key=get_loss_from_name)
