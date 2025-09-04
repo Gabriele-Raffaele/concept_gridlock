@@ -72,7 +72,7 @@ class LaneModule(pl.LightningModule):
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             target = angle if self.multitask == "angle" else distance
-            mask = target.squeeze() == 0.0
+            mask = distance.squeeze() == 0.0
 
             logits = res[0] if isinstance(res, tuple) else res
             #RMSE (root-mean-square error) -G.R.
@@ -87,7 +87,6 @@ class LaneModule(pl.LightningModule):
             logits_angle, logits_dist, param_angle, param_dist = res[0]
 
             mask_distance = distance.squeeze() == 0.0
-            mask_angle = angle.squeeze() == 0.0
             #TODO: The intervention Boolean flag indicates whether 
             # a special type of supervision is being used in which:
             # • Instead of predicting the actual steering angle,
