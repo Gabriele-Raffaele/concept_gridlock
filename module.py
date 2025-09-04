@@ -85,20 +85,19 @@ class LaneModule(pl.LightningModule):
             # (x[:,1:F+1,:], x2[:,1:F+1,:],self.multitask_param_angle, self.multitask_param_dist), attentions -G.R.
             logits_angle, logits_dist, param_angle, param_dist = res[0]
 
-            mask_distance = distance.squeeze() == 0.0
+            mask = distance.squeeze() == 0.0
             #TODO: The intervention Boolean flag indicates whether 
             # a special type of supervision is being used in which:
             # • Instead of predicting the actual steering angle,
             # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
             if not self.intervention:
-                loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask_angle))
+                loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask))
             else: 
                 sm = nn.Softmax(dim=1)
                 angle, distance = distance, angle
-                mask = distance.squeeze() == 0.0
                 loss_angle = self.bce_loss(sm(logits_angle.float()).squeeze()[~mask], angle.float().squeeze()[~mask])
             #RMSE (root-mean-square error) -G.R.
-            loss_distance = torch.sqrt(self.loss(logits_dist.squeeze(), distance.squeeze(), mask_distance))
+            loss_distance = torch.sqrt(self.loss(logits_dist.squeeze(), distance.squeeze(), mask))
 
             if loss_angle.isnan() or loss_distance.isnan():
                 print("ERROR")
@@ -107,7 +106,7 @@ class LaneModule(pl.LightningModule):
             return loss_angle, loss_distance, param_angle, param_dist
         else:
             target = angle if self.multitask == "angle" else distance
-            mask = target.squeeze() == 0.0
+            mask = distance.squeeze() == 0.0
             logits = res[0] if isinstance(res, tuple) else res
             #RMSE (root-mean-square error) -G.R.
             loss = torch.sqrt(self.loss(logits.squeeze(), target.squeeze(), mask))
