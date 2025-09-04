@@ -131,7 +131,8 @@ def main():
                                             monitor="val_loss_accumulated",
                                             mode = "min",
                                             save_last=True,
-                                            filename="epoch={epoch}-val_loss={val_loss_accumulated:.4f}"
+                                            filename="epoch={epoch}-val_loss={val_loss_accumulated:.4f}",
+                                            prefix="" 
                                             )
 
     vs = os.listdir(path)
