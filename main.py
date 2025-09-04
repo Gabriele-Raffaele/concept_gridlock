@@ -15,6 +15,7 @@ import pandas as pd
 import os
 import json
 import glob
+import re
 #function to save predictions
 def save_preds(logits, target, save_name, p, time_horizon=1):
     logits_squeezed = logits.squeeze(-1)  # toglie solo l'ultima dim, shape: [B, S]
@@ -41,7 +42,7 @@ def get_arg_parser():
     parser.add_argument('-train', action=argparse.BooleanOptionalAction)  
     parser.add_argument('-test', action=argparse.BooleanOptionalAction)
     parser.add_argument('-gpu_num', default=0, type=int) 
-    parser.add_argument('-train_concepts', action=argparse.BooleanOptionalAction) 
+    parser.add_argument('-train_concepts', default=False, action=argparse.BooleanOptionalAction) 
     parser.add_argument('-n_scenarios', default=100, type=int) 
     parser.add_argument('-scenario_type', default="not_specified", type=str) 
     parser.add_argument('-dataset_fraction', default=1, type=float) 
@@ -82,7 +83,7 @@ def main():
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         model.to(device)
     '''
-    # Aggiorna n_scenarios in base alla sorgente dei concetti
+    
     
     parser = get_arg_parser()
     args = parser.parse_args()
@@ -128,7 +129,10 @@ def main():
         os.makedirs(path)
     checkpoint_callback = ModelCheckpoint(save_top_k=2, 
                                             monitor="val_loss_accumulated",
-                                            save_last=True)
+                                            mode = "min",
+                                            save_last=True,
+                                            filename="epoch={epoch}-val_loss={val_loss_accumulated:.4f}"
+                                            )
 
     vs = os.listdir(path)
     filt = [elem for elem in vs if 'version' in elem]
@@ -148,16 +152,25 @@ def main():
     if version is not None:
         resume_path = os.path.join(path, f"version_{version}", "checkpoints")
         if os.path.exists(resume_path):
-            files = os.listdir(resume_path)
-            f_name = next((f for f in files if f.endswith(".ckpt")), None)
-            if f_name:
-                resume = os.path.join(resume_path, f_name)
+            files = [f for f in os.listdir(resume_path) if f.endswith(".ckpt") and f.startswith("epoch=")]
+
+            if files:
+                # estrai la loss dal nome usando regex
+                def get_loss_from_name(fname):
+                    match = re.search(r"val_loss=([\d\.]+)", fname)
+                    return float(match.group(1)) if match else float("inf")
+
+                best_ckpt = min(files, key=get_loss_from_name)
+                resume = os.path.join(resume_path, best_ckpt)
             else:
-                resume = None
+                # fallback a last.ckpt
+                last_ckpt = os.path.join(resume_path, "last.ckpt")
+                resume = last_ckpt if os.path.exists(last_ckpt) else None
         else:
             resume = None
     else:
         resume = None
+
     print(f"RESUME FROM: {resume}")
 
 #------------------------------------------------------------
@@ -199,7 +212,7 @@ def main():
         print(f'saving hparams at {save_path}')
         with open(f'{save_path}/hparams.yaml', 'w') as f:
             yaml.dump(args, f)
-
+    
 
     #Use the specified checkpoint to do predictions         
     #p = "/".join(ckpt_path.split("/")[:-2])
@@ -208,18 +221,20 @@ def main():
         #ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
         #Build checkpoint path -G.R.
         if args.checkpoint_path == '':
-            ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
-            #find the latest version -G.R.
-            versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
-            if not versions:
-                raise FileNotFoundError("None found")
-            latest_version = max(versions, key=os.path.getmtime)
+            ckpt_path = resume
+            if ckpt_path is None:
+                ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
+                #find the latest version -G.R.
+                versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
+                if not versions:
+                    raise FileNotFoundError("None found")
+                latest_version = max(versions, key=os.path.getmtime)
 
-            # Find checkpoints in the latest version -G.R.
-            ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
-            if not ckpt_files:
-                raise FileNotFoundError(f"Checkpoint file not found")
-            ckpt_path = max(ckpt_files, key=os.path.getmtime)
+                # Find checkpoints in the latest version -G.R.
+                ckpt_files = glob.glob(os.path.join(latest_version, "checkpoints", "*.ckpt"))
+                if not ckpt_files:
+                    raise FileNotFoundError(f"Checkpoint file not found")
+                ckpt_path = max(ckpt_files, key=os.path.getmtime)
         else:
             ckpt_path = args.checkpoint_path
         print(f"Using checkpoint: {ckpt_path}")
