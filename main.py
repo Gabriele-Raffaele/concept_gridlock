@@ -207,6 +207,8 @@ def main():
     #save_path = args.save_path
     #start training and saves args in a yaml file
     if args.train:
+        if args.checkpoint_path != '':
+            resume = args.checkpoint_path
         trainer.fit(module, ckpt_path=resume)
         save_path = "/".join(checkpoint_callback.best_model_path.split("/")[:-1])
         print(f'saving hparams at {save_path}')
