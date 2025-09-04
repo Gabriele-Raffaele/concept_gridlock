@@ -217,9 +217,9 @@ class VTN(nn.Module):
             
             if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
-            '''elif self.concept_source == "clip":
+            elif self.concept_source == "clip":
                 probs = probs.to(x.device, dtype=torch.float32)
-            '''
+            
             if not self.train_concepts: 
                 probs = probs.detach()
 
