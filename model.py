@@ -208,7 +208,7 @@ class VTN(nn.Module):
                 
             elif self.concept_source == "clip":
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
-                probs = torch.softmax(logits_per_image)
+                probs = torch.softmax(logits_per_image, dim=-1)
 
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
             probs = probs.to(x.device, dtype=torch.float32)
