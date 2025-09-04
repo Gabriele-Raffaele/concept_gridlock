@@ -57,7 +57,7 @@ class LaneModule(pl.LightningModule):
             # • Instead of predicting the actual steering angle,
             # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
             if not self.intervention:
-                loss_angle = self.mae_loss(logits_angle.squeeze(), angle.squeeze(), mask)
+                loss_angle = self.mae_loss(logits_angle.squeeze(), angle.squeeze(), mask_angle)
             else: 
                 sm = nn.Softmax(dim=1)
                 angle, distance = distance, angle
@@ -92,7 +92,7 @@ class LaneModule(pl.LightningModule):
             # • Instead of predicting the actual steering angle,
             # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
             if not self.intervention:
-                loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask))
+                loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask_angle))
             else: 
                 sm = nn.Softmax(dim=1)
                 angle, distance = distance, angle
