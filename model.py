@@ -208,16 +208,16 @@ class VTN(nn.Module):
                 
             elif self.concept_source == "clip":
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
-                probs = torch.softmax(logits_per_image, dim=-1)
-
+                probs = torch.sigmoid(logits_per_image)
+            
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            probs = probs.to(x.device, dtype=torch.float32)
-            print("⚠️ probs shape:", probs.shape)
-            print("⚠️ probs sample:", probs[0, :5, :]) 
-            '''
+            #probs = probs.to(x.device, dtype=torch.float32)
+            #print("⚠️ probs shape:", probs.shape)
+            #print("⚠️ probs sample:", probs[0, :5, :]) 
+            
             if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
-            elif self.concept_source == "clip":
+            '''elif self.concept_source == "clip":
                 probs = probs.to(x.device, dtype=torch.float32)
             '''
             if not self.train_concepts: 
