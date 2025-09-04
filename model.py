@@ -95,7 +95,7 @@ class VTN(nn.Module):
         print(f"Using {len(scenarios)} scenarios")
         self.scenarios_tokens = scenarios_tokens
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
-
+        dfs_freeze(self.clip_model) #freeze CLIP visual backbone
         if backbone == "vit":
             print("using vit backbone")
             self.backbone = vit_base_patch16_224(pretrained=True,num_classes=0,drop_path_rate=0.0,drop_rate=0.0)
