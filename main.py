@@ -241,8 +241,12 @@ def main():
                 ckpt_path = max(ckpt_files, key=os.path.getmtime)
         else:
             ckpt_path = args.checkpoint_path
+            ckpt_path2 = ckpt_path
+            ckpt_path= None
         print(f"Using checkpoint: {ckpt_path}")
+
         test_results = test_trainer.test(module, ckpt_path=None)
+        ckpt_path = ckpt_path2
         result_dir = os.path.dirname(ckpt_path)
         with open(f"{result_dir}/test_metrics.json", "w") as f:
             json.dump(test_results, f, indent=4)
