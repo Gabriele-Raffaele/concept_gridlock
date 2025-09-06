@@ -14,8 +14,8 @@ class CommaDataset(Dataset):
         multitask="angle",
         ground_truth="desired",
         return_full=False, 
-        dataset_fraction=1.0,
-        dataset_path=None
+        dataset_path ="/kaggle/input/final-hdf5-files",
+        dataset_fraction=1.0
     ):
         assert dataset_type in ["train", "val", "test"]
 
@@ -34,15 +34,17 @@ class CommaDataset(Dataset):
         self.multitask = multitask
         self.use_transform = use_transform
         self.return_full = return_full
+        self.dataset_path = dataset_path
         self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
         self.resize = transforms.Resize((224,224))
         #self.resize = transforms.Resize((480,480))
         data_path = f"{self.dataset_path}/filtered_chunk1_{dataset_type}.hdf5" if ground_truth == "regular" else f"{self.dataset_path}/filtered_chunk1_{dataset_type}.hdf5"
         self.people_seqs = []
         self.h5_file = h5py.File(data_path, "r")
-        
+        #corrupt_idx = 62
         self.keys = list(self.h5_file.keys())
-       
+        #if dataset_type == "train":
+        #    self.keys.pop(corrupt_idx)
             
     def __len__(self):
         return len(self.keys)
