@@ -14,7 +14,7 @@ class CommaDataset(Dataset):
         multitask="angle",
         ground_truth="desired",
         return_full=False, 
-        dataset_path ="/kaggle/input/final-hdf5-files",
+        dataset_path =None,
         dataset_fraction=1.0
     ):
         assert dataset_type in ["train", "val", "test"]
