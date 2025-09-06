@@ -95,7 +95,7 @@ def main():
         args.n_scenarios = 148
     
     pl.seed_everything(args.seed, workers=True)
-    print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}, CONCEPT_SOURCE = {args.concept_source}")
+    print(f"TASK = {args.task}, CONCEPT_FEATURES = {args.concept_features}, CONCEPT_SOURCE = {args.concept_source}, DATASET_PATH = {args.dataset_path}, DATASET_FRACTION = {args.dataset_fraction}, BACKBONE = {args.backbone}, TRAIN_CONCEPTS = {args.train_concepts}, TIME_HORIZON = {args.time_horizon}  ")
     #EarlyStopping: stop training when val_loss_accumulated does not improve
     early_stop_callback = EarlyStopping(monitor="val_loss_accumulated", 
                                         min_delta=0.05, 
