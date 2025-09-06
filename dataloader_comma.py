@@ -19,14 +19,6 @@ class CommaDataset(Dataset):
     ):
         assert dataset_type in ["train", "val", "test"]
 
-
-        #WHY??? -G.R.
-        '''
-        if dataset_type == "val":
-            dataset_type = "test" 
-        if dataset_type == "test":
-            dataset_type = "val" 
-        '''
         self.dataset_type = dataset_type
         self.dataset_fraction = dataset_fraction
         self.max_len = 240
