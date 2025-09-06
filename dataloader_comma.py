@@ -14,7 +14,7 @@ class CommaDataset(Dataset):
         multitask="angle",
         ground_truth="desired",
         return_full=False, 
-        dataset_fraction=1.0
+        dataset_fraction=1.0,
         dataset_path=None
     ):
         assert dataset_type in ["train", "val", "test"]
