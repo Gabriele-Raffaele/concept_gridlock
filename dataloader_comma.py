@@ -27,8 +27,8 @@ class CommaDataset(Dataset):
         self.use_transform = use_transform
         self.return_full = return_full
         self.dataset_path = dataset_path
-        #self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
-        self.normalize = transforms.Normalize((0.48145466, 0.4578275, 0.40821073),(0.26862954, 0.26130258, 0.27577711))
+        self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        #self.normalize = transforms.Normalize((0.48145466, 0.4578275, 0.40821073),(0.26862954, 0.26130258, 0.27577711))
         self.resize = transforms.Resize((224,224))
         #self.resize = transforms.Resize((480,480))
         data_path = f"{self.dataset_path}/filtered_chunk1_{dataset_type}.hdf5" if ground_truth == "regular" else f"{self.dataset_path}/filtered_chunk1_{dataset_type}.hdf5"
@@ -66,16 +66,12 @@ class CommaDataset(Dataset):
         distances = sequences['dist'] if self.ground_truth else desired_gap
         images = sequences['image']
         images = images[:,0:160, :,:]#crop the image to remove the view of the inside car console
-        #images = images.permute(0,3,1,2)
-        images = images.permute(0,3,1,2).float() / 255.0
-        images = self.resize(images)
+        images = images.permute(0,3,1,2)
         if not self.return_full:
-            #images = self.normalize(images/255.0)
             images = self.normalize(images)
-            
-        #else:
-        #    images = images/255.0
-        #images = self.resize(images)
+        else:
+            images = images/255.0
+        images = self.resize(images)
         images_cropped = images
         intervention = np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool) 
         res = images_cropped, images_cropped,  sequences['vEgo'],  sequences['angle'], distances, seq_key
