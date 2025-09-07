@@ -22,7 +22,7 @@ multitask = 'distance'
 backbone = 'none'
 concept_features = True
 
-scenarios_tokens = scenarios_tokens.to()
+#scenarios_tokens = scenarios_tokens.to()
 
 def extract_number(filename):
         match = re.search(r'\d+', filename)
