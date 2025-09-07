@@ -66,14 +66,16 @@ class CommaDataset(Dataset):
         distances = sequences['dist'] if self.ground_truth else desired_gap
         images = sequences['image']
         images = images[:,0:160, :,:]#crop the image to remove the view of the inside car console
-        images = images.permute(0,3,1,2)
-
-        if not self.return_full:
-            images = self.normalize(images/255.0)
-            
-        else:
-            images = images/255.0
+        #images = images.permute(0,3,1,2)
+        images = images.permute(0,3,1,2).float() / 255.0
         images = self.resize(images)
+        if not self.return_full:
+            #images = self.normalize(images/255.0)
+            images = self.normalize(images)
+            
+        #else:
+        #    images = images/255.0
+        #images = self.resize(images)
         images_cropped = images
         intervention = np.array(sequences['gaspressed']).astype(bool) | np.array(sequences['brakepressed']).astype(bool) 
         res = images_cropped, images_cropped,  sequences['vEgo'],  sequences['angle'], distances, seq_key
