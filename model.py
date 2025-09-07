@@ -83,8 +83,6 @@ class VTN(nn.Module):
         self.return_concepts = return_concepts
         self.train_concepts = train_concepts
         self.concept_source = concept_source
-        if concept_features and concept_source == "clip":
-            self.temperature = nn.Parameter(torch.tensor(10.0))
         self._construct_network(multitask, backbone, multitask_param, concept_features)
 
     def _construct_network(self, multitask, backbone, multitask_param, concept_features):
@@ -218,30 +216,12 @@ class VTN(nn.Module):
                 
             elif self.concept_source == "clip":
                 
-                logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
-                # 🔍 DEBUG: stampa alcuni valori grezzi
-                print("logits_per_image sample:", logits_per_image[0, :10].detach().cpu().numpy())
-                
+                logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))                
                 # Min-max normalization between 0 and 1
-                '''
                 logits_min = logits_per_image.min(dim=1, keepdim=True)[0]
                 logits_max = logits_per_image.max(dim=1, keepdim=True)[0]
                 logits_norm = (logits_per_image - logits_min) / (logits_max - logits_min + 1e-8)
-                '''
-                '''
-                probs = torch.relu(logits_per_image)
-                print("max logits:", probs.max().item(), "min logits:", probs.min().item())
-                print("logits_norm sample:", probs[0, :10].detach().cpu().numpy())
-                probs = probs / (probs.max() + 1e-8)
-                '''
-
-
-                probs = torch.sigmoid(logits_per_image / self.temperature)
-                print("max logits:", probs.max().item(), "min logits:", probs.min().item(), "mean logits:", probs.mean().item())
-
-                
-                #probs = torch.sigmoid(logits_per_image / self.temperature)
-            
+                probs = torch.sigmoid(logits_norm)            
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
          
             
