@@ -1,2 +1,0 @@
-python3 main.py -dataset comma -backbone clip -ground_truth normal -train -gpu_num 1  -max_epochs 200 -task  angle -bs 2  -dataset_path /data1/shared/jessica/data1/data/toyota/
-python3 main.py -dataset comma -backbone clip -ground_truth normal -train -gpu_num 1  -max_epochs 200 -task  distance -bs 2  -dataset_path /data1/shared/jessica/data1/data/toyota/
