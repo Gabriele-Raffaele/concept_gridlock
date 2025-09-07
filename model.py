@@ -97,9 +97,10 @@ class VTN(nn.Module):
         print(f"Using {len(scenarios)} scenarios")
         self.scenarios_tokens = scenarios_tokens
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
-        
+        """
         for param in self.clip_model.parameters():
             param.requires_grad = False
+        """
         if backbone == "vit":
             print("using vit backbone")
             self.backbone = vit_base_patch16_224(pretrained=True,num_classes=0,drop_path_rate=0.0,drop_rate=0.0)
@@ -211,22 +212,12 @@ class VTN(nn.Module):
                 probs = torch.cat(logits_per_image, dim=0)  
                 
             elif self.concept_source == "clip":
-                B, F, C, H, W = img.shape
-
-                # prendo il primo batch e il primo frame
-                frame = img[0, 0]  # shape [C, H, W]
-
-                # se vuoi riportarlo a [H, W, C] per matplotlib
-                frame_np = frame.permute(1, 2, 0).detach().cpu().numpy()
-
-                # se hai fatto normalizzazione tipo [-1, 1], riportalo a [0, 1]
-                frame_np = (frame_np - frame_np.min()) / (frame_np.max() - frame_np.min() + 1e-5)
-
-                plt.imshow(frame_np)
-                plt.axis("off")
-                plt.imsave("debug_frame.png", frame_np)
+                
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
+                # 🔍 DEBUG: stampa alcuni valori grezzi
+                print("logits_per_image sample:", logits_per_image[0, :10].detach().cpu().numpy())
                 probs = torch.sigmoid(logits_per_image)
+                print("probs sample:", probs[0, :10].detach().cpu().numpy())
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
             #probs = probs.to(x.device, dtype=torch.float32)
