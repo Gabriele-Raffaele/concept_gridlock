@@ -97,10 +97,10 @@ class VTN(nn.Module):
         print(f"Using {len(scenarios)} scenarios")
         self.scenarios_tokens = scenarios_tokens
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
-        """
+        
         for param in self.clip_model.parameters():
             param.requires_grad = False
-        """
+        
         if backbone == "vit":
             print("using vit backbone")
             self.backbone = vit_base_patch16_224(pretrained=True,num_classes=0,drop_path_rate=0.0,drop_rate=0.0)
@@ -179,6 +179,9 @@ class VTN(nn.Module):
         # we need to roll the previous sensor features, so that we do not include the step that we want to predict
         # we also substitude empty 0th entry then with 1st entry
         x = img
+        # 🔍 DEBUG: stampa i valori min/max delle immagini
+        print("DEBUG img range:", img.min().item(), img.max().item())
+        print("DEBUG img sample (first frame, first channel):", img[0,0,0,:5,:5].detach().cpu().numpy())
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
             if self.concept_source == "retinanet":
@@ -220,7 +223,7 @@ class VTN(nn.Module):
                 print("probs sample:", probs[0, :10].detach().cpu().numpy())
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
-            #probs = probs.to(x.device, dtype=torch.float32)
+            
             #print("⚠️ probs shape:", probs.shape)
             #print("⚠️ probs sample:", probs[0, :5, :]) 
             
