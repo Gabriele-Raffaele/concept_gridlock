@@ -8,6 +8,8 @@ import clip
 from PIL import Image
 from utils import * 
 from torchvision.models import resnet18, ResNet18_Weights
+import matplotlib.pyplot as plt
+import torchvision.transforms as T
 
 def dfs_freeze(model):
     '''freeze model parameters (e.g. for backbone)'''
@@ -209,7 +211,20 @@ class VTN(nn.Module):
                 probs = torch.cat(logits_per_image, dim=0)  
                 
             elif self.concept_source == "clip":
-                print(f"img shape 0: {img.shape[0]}, 1: {img.shape[1]}, 2: {img.shape[2]}, 3: {img.shape[3]}, 4: {img.shape[4]}")
+                B, F, C, H, W = img.shape
+
+                # prendo il primo batch e il primo frame
+                frame = img[0, 0]  # shape [C, H, W]
+
+                # se vuoi riportarlo a [H, W, C] per matplotlib
+                frame_np = frame.permute(1, 2, 0).detach().cpu().numpy()
+
+                # se hai fatto normalizzazione tipo [-1, 1], riportalo a [0, 1]
+                frame_np = (frame_np - frame_np.min()) / (frame_np.max() - frame_np.min() + 1e-5)
+
+                plt.imshow(frame_np)
+                plt.axis("off")
+                plt.show()
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
                 probs = torch.sigmoid(logits_per_image)
             
