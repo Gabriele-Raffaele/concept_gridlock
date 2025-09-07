@@ -224,7 +224,7 @@ class VTN(nn.Module):
 
                 plt.imshow(frame_np)
                 plt.axis("off")
-                plt.show()
+                plt.imsave("debug_frame.png", frame_np)
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
                 probs = torch.sigmoid(logits_per_image)
             
