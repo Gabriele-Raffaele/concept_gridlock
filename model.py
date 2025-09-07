@@ -224,7 +224,7 @@ class VTN(nn.Module):
                 logits_min = logits_per_image.min(dim=1, keepdim=True)[0]
                 logits_max = logits_per_image.max(dim=1, keepdim=True)[0]
                 logits_norm = (logits_per_image - logits_min) / (logits_max - logits_min + 1e-8)
-                print("max logits:", logits_per_image.max().item(), "min logits:", logits_per_image.min().item())
+                print("max logits:", logits_norm.max().item(), "min logits:", logits_norm.min().item())
                 # 🔍 DEBUG: stampa alcuni valori normalizzati
                 print("logits_norm sample:", logits_norm[0, :10].detach().cpu().numpy())
                 # applica sigmoid dopo la normalizzazione
