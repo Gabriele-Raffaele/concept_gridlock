@@ -181,7 +181,7 @@ class VTN(nn.Module):
         x = img
                 # 🔍 DEBUG: stampa i valori min/max delle immagini
         print("DEBUG img range:", img.min().item(), img.max().item())
-        print("DEBUG img sample (first frame, first channel):", img[0,0,0,:5,:5].detach().cpu().numpy())
+        #print("DEBUG img sample (first frame, first channel):", img[0,0,0,:5,:5].detach().cpu().numpy())
 
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
