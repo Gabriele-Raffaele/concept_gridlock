@@ -224,7 +224,7 @@ def main():
         #if train and test are not computed together then checkpoint_callback.best_model_path will not be set because the model was not trained
         #ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
         #Build checkpoint path -G.R.
-        '''if args.checkpoint_path == '':
+        if args.checkpoint_path == '':
             ckpt_path = resume
             if ckpt_path is None:
                 ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
@@ -242,12 +242,11 @@ def main():
         else:
             ckpt_path = args.checkpoint_path
         print(f"Using checkpoint: {ckpt_path}")
-        '''
-        test_results = test_trainer.test(module, ckpt_path=None)
-        '''result_dir = os.path.dirname(ckpt_path)
+        test_results = test_trainer.test(module, ckpt_path=ckpt_path)
+        result_dir = os.path.dirname(ckpt_path)
         with open(f"{result_dir}/test_metrics.json", "w") as f:
             json.dump(test_results, f, indent=4)
-        
+        '''
         preds = test_trainer.predict(module, ckpt_path=None)
         #save_path =  "."
         for pred in preds:
