@@ -207,7 +207,11 @@ class VTN(nn.Module):
                         if not found:
                             print(f"❌ None found with video_name = {key}, skipping to CLIP")
                             logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
-                            probs = torch.sigmoid(logits_per_image)
+                            # Min-max normalization between 0 and 1
+                            logits_min = logits_per_image.min(dim=1, keepdim=True)[0]
+                            logits_max = logits_per_image.max(dim=1, keepdim=True)[0]
+                            logits_norm = (logits_per_image - logits_min) / (logits_max - logits_min + 1e-8)
+                            probs = torch.sigmoid(logits_norm)       
                             break
                     
                     logits_per_image.append(data['concepts'][:, 1:])
