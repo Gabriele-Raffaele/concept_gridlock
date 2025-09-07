@@ -211,6 +211,7 @@ class VTN(nn.Module):
                 probs = torch.cat(logits_per_image, dim=0)  
                 
             elif self.concept_source == "clip":
+                print(f"img shape 0: {img.shape[0]}, 1: {img.shape[1]}, 2: {img.shape[2]}, 3: {img.shape[3]}, 4: {img.shape[4]}")
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
                 probs = torch.sigmoid(logits_per_image)
             
