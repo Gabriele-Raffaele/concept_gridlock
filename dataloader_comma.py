@@ -27,7 +27,8 @@ class CommaDataset(Dataset):
         self.use_transform = use_transform
         self.return_full = return_full
         self.dataset_path = dataset_path
-        self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        #self.normalize = transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+        self.normalize = transforms.Normalize((0.48145466, 0.4578275, 0.40821073),(0.26862954, 0.26130258, 0.27577711))
         self.resize = transforms.Resize((224,224))
         #self.resize = transforms.Resize((480,480))
         data_path = f"{self.dataset_path}/filtered_chunk1_{dataset_type}.hdf5" if ground_truth == "regular" else f"{self.dataset_path}/filtered_chunk1_{dataset_type}.hdf5"
