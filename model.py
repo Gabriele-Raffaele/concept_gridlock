@@ -223,9 +223,11 @@ class VTN(nn.Module):
                 print("logits_per_image sample:", logits_per_image[0, :10].detach().cpu().numpy())
                 
                 # Min-max normalization between 0 and 1
+                '''
                 logits_min = logits_per_image.min(dim=1, keepdim=True)[0]
                 logits_max = logits_per_image.max(dim=1, keepdim=True)[0]
                 logits_norm = (logits_per_image - logits_min) / (logits_max - logits_min + 1e-8)
+                '''
                 '''
                 probs = torch.relu(logits_per_image)
                 print("max logits:", probs.max().item(), "min logits:", probs.min().item())
@@ -233,8 +235,8 @@ class VTN(nn.Module):
                 probs = probs / (probs.max() + 1e-8)
                 '''
 
-               
-                probs = torch.sigmoid(logits_norm)
+
+                probs = torch.sigmoid(logits_per_image / self.temperature)
                 print("max logits:", probs.max().item(), "min logits:", probs.min().item(), "mean logits:", probs.mean().item())
 
                 
