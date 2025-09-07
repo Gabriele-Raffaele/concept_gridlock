@@ -179,9 +179,6 @@ class VTN(nn.Module):
         # we need to roll the previous sensor features, so that we do not include the step that we want to predict
         # we also substitude empty 0th entry then with 1st entry
         x = img
-        # 🔍 DEBUG: stampa i valori min/max delle immagini
-        print("DEBUG img range:", img.min().item(), img.max().item())
-        print("DEBUG img sample (first frame, first channel):", img[0,0,0,:5,:5].detach().cpu().numpy())
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
             if self.concept_source == "retinanet":
@@ -219,7 +216,12 @@ class VTN(nn.Module):
                 logits_per_image, logits_per_text = self.clip_model(img.reshape((img.shape[0]*img.shape[1], img.shape[2], img.shape[3], img.shape[4])), self.scenarios_tokens.to(x.device))
                 # 🔍 DEBUG: stampa alcuni valori grezzi
                 print("logits_per_image sample:", logits_per_image[0, :10].detach().cpu().numpy())
-                probs =torch.sigmoid(logits_per_image)
+                # Min-max normalization tra 0 e 1
+                logits_min = logits_per_image.min(dim=1, keepdim=True)[0]
+                logits_max = logits_per_image.max(dim=1, keepdim=True)[0]
+                logits_norm = (logits_per_image - logits_min) / (logits_max - logits_min + 1e-8)
+                # applica sigmoid dopo la normalizzazione
+                probs = torch.sigmoid(logits_norm)
                 print("probs sample:", probs[0, :10].detach().cpu().numpy())
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
