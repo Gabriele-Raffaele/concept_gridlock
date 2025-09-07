@@ -224,7 +224,7 @@ def main():
         #if train and test are not computed together then checkpoint_callback.best_model_path will not be set because the model was not trained
         #ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
         #Build checkpoint path -G.R.
-        if args.checkpoint_path == '':
+        '''if args.checkpoint_path == '':
             ckpt_path = resume
             if ckpt_path is None:
                 ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
@@ -241,13 +241,10 @@ def main():
                 ckpt_path = max(ckpt_files, key=os.path.getmtime)
         else:
             ckpt_path = args.checkpoint_path
-            ckpt_path2 = ckpt_path
-            ckpt_path= None
         print(f"Using checkpoint: {ckpt_path}")
-
+        '''
         test_results = test_trainer.test(module, ckpt_path=None)
-        ckpt_path = ckpt_path2
-        result_dir = os.path.dirname(ckpt_path)
+        '''result_dir = os.path.dirname(ckpt_path)
         with open(f"{result_dir}/test_metrics.json", "w") as f:
             json.dump(test_results, f, indent=4)
         
@@ -267,7 +264,7 @@ def main():
                 res, angle, dist = pred[0], pred[1], pred[2]
                 (preds_angle, preds_dist, param_angle, param_dist), attention = res
                 save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)
-                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)
+                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)'''
 
 if __name__ == "__main__":
     main()
