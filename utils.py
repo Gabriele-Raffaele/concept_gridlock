@@ -21,11 +21,6 @@ def get_scenarios(concept_source: str) -> str:
     else:
         raise ValueError(f"Unknown concept_source: {concept_source}")
 
-#scenarios = random.sample(scenarios, 300)
-#with open("scenarios_small_100.txt", "w") as file:
-#    for item in scenarios:
-#        file.write(str(item) + "\n")
-#scenarios_tokens = clip.tokenize(scenarios)
 """
     #ORIGINAL CODE
 def pad_collate(batch):

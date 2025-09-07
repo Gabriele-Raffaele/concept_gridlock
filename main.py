@@ -74,16 +74,6 @@ def main():
     if torch.cuda.device_count() > 0 and torch.cuda.get_device_capability()[0] >= 7:
         # Set the float32 matrix multiplication precision to 'high'
         torch.set_float32_matmul_precision('high')
-    '''
-    if torch.cuda.is_available() and torch.cuda.device_count() > 1:
-        device = torch.device("cuda")
-        model = DataParallel(model, device_ids=[0,1])  # scegli 0,1,2… in base alle GPU
-        model.to(device)
-    else:
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        model.to(device)
-    '''
-    
     
     parser = get_arg_parser()
     args = parser.parse_args()
@@ -122,7 +112,7 @@ def main():
                         dataset_fraction=args.dataset_fraction,
                         time_horizon=args.time_horizon
                         )
-    #set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
+    #Set where to save the checkpoints, when to save them with the ModelCheckpoint callback, and the logger for TensorBoard
     ckpt_pth = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
     path = ckpt_pth + "/lightning_logs/" 
     if not os.path.exists(path):
@@ -206,7 +196,7 @@ def main():
         callbacks=[TQDMProgressBar(refresh_rate=5), checkpoint_callback],
         log_every_n_steps=1,
         )
-    #save_path = args.save_path
+    
     #start training and saves args in a yaml file
     if args.train:
         if args.checkpoint_path != '':
@@ -219,7 +209,6 @@ def main():
     
 
     #Use the specified checkpoint to do predictions         
-    #p = "/".join(ckpt_path.split("/")[:-2])
     if args.test:
         #if train and test are not computed together then checkpoint_callback.best_model_path will not be set because the model was not trained
         #ckpt_path = args.checkpoint_path if args.checkpoint_path != '' else checkpoint_callback.best_model_path
@@ -246,7 +235,7 @@ def main():
         result_dir = os.path.dirname(ckpt_path)
         with open(f"{result_dir}/test_metrics.json", "w") as f:
             json.dump(test_results, f, indent=4)
-        '''
+        
         preds = test_trainer.predict(module, ckpt_path=None)
         #save_path =  "."
         for pred in preds:
@@ -263,7 +252,7 @@ def main():
                 res, angle, dist = pred[0], pred[1], pred[2]
                 (preds_angle, preds_dist, param_angle, param_dist), attention = res
                 save_preds(preds_angle, angle, f"angle_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)
-                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)'''
+                save_preds(preds_dist, dist, f"dist_multi_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.concept_source}", "/kaggle/working", module.time_horizon)
 
 if __name__ == "__main__":
     main()

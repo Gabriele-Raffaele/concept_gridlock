@@ -52,7 +52,7 @@ class LaneModule(pl.LightningModule):
             mask_angle = angle.squeeze() == 0.0
             mask_distance = distance.squeeze() == 0.0
 
-            #TODO: The intervention Boolean flag indicates whether 
+            #The intervention Boolean flag indicates whether 
             # a special type of supervision is being used in which:
             # • Instead of predicting the actual steering angle,
             # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
@@ -87,10 +87,6 @@ class LaneModule(pl.LightningModule):
             logits_angle, logits_dist, param_angle, param_dist = res[0]
             mask_angle = angle.squeeze() == 0.0
             mask_distance = distance.squeeze() == 0.0
-            #TODO: The intervention Boolean flag indicates whether 
-            # a special type of supervision is being used in which:
-            # • Instead of predicting the actual steering angle,
-            # • The model must predict where the driver should have intervened (intervention label), as if it were an "alert system."
             if not self.intervention:
                 loss_angle = torch.sqrt(self.loss(logits_angle.squeeze(), angle.squeeze(), mask_angle))
             else: 
@@ -134,7 +130,7 @@ class LaneModule(pl.LightningModule):
 
     def predict_step(self, batch, batch_idx):
         _, image_array, vego, angle, distance, seq_key, m_lens, i_lens, s_lens, a_lens, d_lens = batch
-       #TODO: time_horizon is an integer parameter that indicates how often the model 
+       #Time horizon is an integer parameter that indicates how often the model 
        # should make a prediction during inference or testing. It is used to simulate 
        # a sequential prediction over time, as if the vehicle were proceeding into the 
        # future, prediction after prediction, using previous outputs as inputs.
@@ -213,10 +209,10 @@ class LaneModule(pl.LightningModule):
                 for j in range(self.time_horizon):
                     input_ids_img, input_ids_vego, input_ids_angle, input_ids_distance = image_array[:,0:i+j, :, :, :], vego[:,0:i+j], angle_autoreg[:,0:i+j], distance_autoreg[:,0:i+j]
                     if self.multitask == "angle" and len(logits_all) > 0:
-                        #print(f"DEBUG: logits_angle={logits_all[-1].squeeze().shape}")
+                        
                         angle_autoreg[:, i+j] = logits_all[-1].squeeze(-1)
                     if self.multitask == "distance" and len(logits_all) > 0:
-                        #print(f"DEBUG: logits_distance={logits_all[-1].squeeze().shape}")
+                        
                         distance_autoreg[:, i+j] = logits_all[-1].squeeze(-1)
                     if self.multitask == "multitask":
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
@@ -227,15 +223,12 @@ class LaneModule(pl.LightningModule):
                         distance_autoreg[:, i+j] = logits_distance.squeeze(-1)
                         logits_angle_all.append(logits_angle)
                         logits_distance_all.append(logits_distance)
-                        #print(f"DEBUG: angle={logits_angle.shape}, distance={logits_distance.shape}")
+                        
                        
                     else:
                         res, probs = self(input_ids_img, input_ids_angle, input_ids_distance, input_ids_vego, seq_key)
                         logits, attns = res
-                        #print(f"DEBUG: logits={logits.shape}")
-                        ##(1) MA qui ci si entra quando si è in singletask  -- G.V. 
                         logits = logits[:, -1]
-                        #print(f"DEBUG: logits={logits.shape}")
                         logits_all.append(logits)
                     attns_all.append(attns if attns is not None else torch.zeros_like(attns))
 
@@ -258,7 +251,6 @@ class LaneModule(pl.LightningModule):
                 return (loss_angle, loss_dist)
             else:
                 logits_all = torch.stack(logits_all, dim=1)
-                #(2) Viene chiamata la calculate loss -- G.V 
                 loss = self.calculate_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:])
                 self.log("test_loss", loss, on_epoch=True, batch_size=self.bs, sync_dist=True)   
                 loss_mae = self.calculate_mae_loss((logits_all, attns_all), angle[:,self.time_horizon:], distance[:,self.time_horizon:]) 
