@@ -232,6 +232,8 @@ class VTN(nn.Module):
                 # applica sigmoid dopo la normalizzazione
                 #probs = torch.sigmoid(logits_norm)
                 probs = probs / (probs.max() + 1e-8)
+                print("max logits:", probs.max().item(), "min logits:", probs.min().item())
+
                 #print("probs sample:", probs[0, :10].detach().cpu().numpy())
             
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
