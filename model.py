@@ -178,8 +178,6 @@ class VTN(nn.Module):
         x = img
         if self.concept_features:
             s = img.shape#[batch_size, seq_len, h,w,c]
-            print (f"id {seq_key} - img shape: {s}")
-            print("img min/max:", img.min().item(), img.max().item())
             if self.concept_source == "retinanet":
                 
                 logits_per_image = []
