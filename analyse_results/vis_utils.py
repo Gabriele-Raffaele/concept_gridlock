@@ -17,10 +17,10 @@ import clip
 
 from utils import * 
 import re
-#gpu_num = 1
-#gpu = f'cuda:{gpu_num}'
-#multitask = 'distance'
-#backbone = 'none'
+gpu_num = 1
+gpu = f'cuda:{gpu_num}'
+multitask = 'distance'
+backbone = 'none'
 concept_features = True
 
 def extract_number(filename):
@@ -46,7 +46,6 @@ class UnNormalize(object):
         return tensor
 
 unorm = UnNormalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225))
-
 
 
 def get_aligned_attention(attention, seq_len):
