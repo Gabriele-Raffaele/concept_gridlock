@@ -16,7 +16,7 @@ import os
 
 HDF5_FILE = "probs_clip.hdf5"
 
-
+'''
 def append_to_dataset(h5f, vid, new_data):
     if vid in h5f:
         dset = h5f[vid]
@@ -31,6 +31,7 @@ def append_to_dataset(h5f, vid, new_data):
             maxshape=(None, new_data.shape[1]),
             compression="gzip"
         )
+'''
 
 def dfs_freeze(model):
     '''freeze model parameters (e.g. for backbone)'''
@@ -249,12 +250,14 @@ class VTN(nn.Module):
                 logits_norm = (logits_per_image - logits_min) / (logits_max - logits_min + 1e-8)
                 probs = torch.sigmoid(logits_norm)            
             probs = probs.reshape((int(img.shape[0]), int(probs.shape[0]/img.shape[0]), -1)) #Reshape to [batch_size, seq_len, num_scenarios] -G.R.
+            '''
             probs_np = probs.detach().cpu().numpy()
             with h5py.File(HDF5_FILE, "a") as h5f:
                 for vid, vid_probs in zip(seq_key, probs_np):
                     # vid_probs shape = (num_frames, num_concepts)
                     append_to_dataset(h5f, str(vid), vid_probs)
-         
+            '''
+
             
             if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
