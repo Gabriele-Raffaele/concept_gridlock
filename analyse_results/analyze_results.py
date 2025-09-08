@@ -27,10 +27,6 @@ gpu = f'cuda:{gpu_num}'
 multitask = 'distance'
 backbone = 'none'
 concept_features = True
-'''
-nuscenes_ds = NUScenesDataset(dataset_type="test",
-        multitask=multitask, max_len=20,
-        ground_truth="normal", dataset_path='/data1/jessica/data/toyota/')'''
 
 commda_ds = CommaDataset(dataset_type="test",
         multitask=multitask,

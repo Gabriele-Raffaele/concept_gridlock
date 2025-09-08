@@ -8,7 +8,6 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils import pad_collate
 from dataloader_comma import CommaDataset
-from dataloader_nuscenes import NUScenesDataset
 from collections import Counter
 import imageio
 from model import VTN

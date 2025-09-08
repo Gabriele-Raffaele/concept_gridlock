@@ -17,7 +17,7 @@ multitask = "distance"
 dataset_type = 'train'
 dataset = CommaDataset(dataset_type=dataset_type, multitask=multitask, return_full=True)
 loader = DataLoader(dataset, batch_size=1, num_workers=5)
-save_path = '/data1/shared/jessica/data3/data/toyota/explanation/'
+
 dfs = []
 text = clip.tokenize(scenarios).to(device)
 scenarios_tokens = scenarios_tokens.to(device)
