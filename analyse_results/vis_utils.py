@@ -13,6 +13,7 @@ from model import VTN
 import matplotlib.pyplot as plt 
 from PIL import Image
 import glob
+import clip
 
 from utils import * 
 import re
@@ -22,8 +23,23 @@ multitask = 'distance'
 backbone = 'none'
 concept_features = True
 
-#scenarios_tokens = scenarios_tokens.to()
-
+def get_scenarios(concept_source: str) -> str:
+    if concept_source == "retinanet":
+        p = "/kaggle/working/concept_gridlock/scenarios/scenarios_road.txt"
+        with open(p) as file:
+            lines = [line.strip() for line in file]
+        scenarios = lines
+        scenarios_tokens = clip.tokenize(scenarios)
+        return (scenarios, scenarios_tokens)
+    elif concept_source == "clip":
+        p = "/kaggle/working/concept_gridlock/scenarios/scenarios_small_100.txt"
+        with open(p) as file:
+            lines = [line.strip() for line in file]
+        scenarios = lines
+        scenarios_tokens = clip.tokenize(scenarios)
+        return (scenarios, scenarios_tokens)
+    else:
+        raise ValueError(f"Unknown concept_source: {concept_source}")
 def extract_number(filename):
         match = re.search(r'\d+', filename)
         return int(match.group()) if match else -1
