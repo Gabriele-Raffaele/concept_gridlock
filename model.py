@@ -184,7 +184,7 @@ class VTN(nn.Module):
             if self.concept_source == "retinanet":
                 
                 logits_per_image = []
-                main_dir = "/kaggle/input/road-logits"
+                main_dir = "/kaggle/input/noisy-concepts"
                 for key in seq_key:
                     dir = f"{main_dir}/{key}.pt"
                     data = torch.load(dir)
