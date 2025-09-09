@@ -1,0 +1,39 @@
+retinanet:
+    seed42:
+        multitask:
+            angle: 0.905031
+            distance: 7.845190
+        angle: 0.724114
+        distance: 4.558520
+    seed123:
+        multitask:
+             angle: 1.006145
+             distance: 5.507323
+        angle: 0.725218
+        distance: 5.091535
+    seed2025:
+         multitask:
+             angle: 0.979915
+             distance: 7.571976
+         angle: 0.782242
+         distance: 4.734835
+
+clip:
+     seed42:
+         multitask:
+             angle: 0.951656
+             distance: 7.300178
+         angle: 0.765234
+         distance: 4.169558
+     seed123:
+         multitask:
+             angle: 0.844611
+             distance: 5.222592
+         angle: 0.830174
+         distance: 5.414745
+     seed2025:
+         multitask:
+             angle: 0.889599
+             distance: 5.225522
+         angle: 0.803465
+         distance: 4.883592
