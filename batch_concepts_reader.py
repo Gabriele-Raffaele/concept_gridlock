@@ -8,7 +8,7 @@ import torch
 
 # Path template
 path = (
-   "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/concept_gridlock/kaggle/working/road-save/comma/cache/resnet50I3D512-Pkinetics-b4s8x1x1-commat3-h3x3x3/batch_concepts-30-08/b0c9d2329ad1606b_2018-07-27--06-03-57_11.pt"
+   "/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/venv/concept_gridlock/Similarity/concepts_with_noise/b0c9d2329ad1606b_2018-08-17--14-55-39_4.pt"
 )
 # Fill in the batch number
 
@@ -20,10 +20,6 @@ data = torch.load(path, map_location="cpu", weights_only=True)
 print("Available keys:", data.keys())
 
 
-concepts = data["textual_concepts"]
-
-with open('/Users/gabriele/Desktop/Magistrale/Explainable_and_trustworthy_AI/progetti/concept_gridlock/scenarios/road_concepts.txt', 'w') as f:
-    for concept in concepts:
-        f.write(concept + '\n')
-
-print("Road concepts have been written to 'road_concepts.txt'.")
+concepts = data["concepts"]
+#print concepts at frame 152 (should be all zeros)
+print("concepts at frame 152:", concepts[211])  # (num_concepts
