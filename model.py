@@ -323,8 +323,11 @@ class VTN(nn.Module):
         
         # MLP head
         attentions = x['attentions']
+        for i, a in enumerate(attentions if isinstance(attentions,(list,tuple)) else [attentions]):
+            print(i, a.shape)
+            
         x = x["last_hidden_state"]
-        
+        print("x.shape(last_hidden_layers):", x.shape)
 
         if self.multitask:
             x2 = self.mlp_head_2(x)
