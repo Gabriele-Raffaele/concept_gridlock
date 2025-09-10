@@ -216,7 +216,7 @@ def main():
         if args.checkpoint_path == '':
             ckpt_path = resume
             if ckpt_path is None:
-                ckpt_root = f"/kaggle/working/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
+                ckpt_root = f"/kaggle/input/comma-ckpt-seed123/ckpts_final_{args.dataset}_{args.task}_{args.backbone}_{args.concept_features}_{args.dataset_fraction}_{args.concept_source}"
                 #find the latest version -G.R.
                 versions = glob.glob(os.path.join(ckpt_root, "lightning_logs", "version_*"))
                 if not versions:
