@@ -72,13 +72,12 @@ def split_string(string):
 commda_ds = CommaDataset(dataset_type="test",
         multitask=multitask,
         ground_truth="normal", dataset_path='/kaggle/input/filtered-chunk-hdf5', return_full=True)
-#nuscenes_ds = NUScenesDataset(dataset_type="test",
-#        multitask=multitask, max_len=20,
-#        ground_truth="normal", dataset_path='/data1/jessica/data/toyota/')
+
 dataloader_comma = DataLoader(commda_ds, batch_size=1, shuffle=False, num_workers=0)
-#dataloader_nuscenes = DataLoader(nuscenes_ds, batch_size=1, shuffle=True, num_workers=0, collate_fn=pad_collate)
+
 
 print (f"Dimension of dataloader_comma: {len(dataloader_comma.dataset)} ")
+
 print(f"Number of batches: {len(dataloader_comma)}")
 for j, batch in tqdm(enumerate(dataloader_comma)):
     image_array,  vego, angle, distance, g, s, l = batch
