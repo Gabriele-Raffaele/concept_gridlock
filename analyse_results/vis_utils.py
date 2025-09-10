@@ -90,9 +90,5 @@ commda_ds = CommaDataset(dataset_type="test",
 dataloader_comma = DataLoader(commda_ds, batch_size=1, shuffle=False, num_workers=0)
 
 model = VTN(multitask=multitask, backbone=backbone, concept_features=concept_features, device = f"cuda:{gpu_num}", return_concepts=True)
-#checkpoint_path_distance = '/data1/jessica/data/toyota/ckpts_final/ckpts_final_comma_distance_none/lightning_logs/version_0/checkpoints//epoch=50-step=3162.ckpt'
-#checkpoint_path_angle = '/data1/jessica/data/toyota/ckpts_final/ckpts_final_nuscenes_distance_none/lightning_logs/version_10/checkpoints/epoch=519-step=14560.ckpt'
-#p = '/data1/jessica/data/toyota/ckpts_final/ckpts_final_comma_distance_none_True_ablation/lightning_logs/version_2/checkpoints/epoch=77-step=19266.ckpt'
-#p = '/data1/jessica/data/toyota/ckpts_final/ckpts_final_comma_distance_none_True_ablation/lightning_logs/version_2/checkpoints/epoch=64-step=16055.ckpt'
-#checkpoint_path = checkpoint_path_distance
+
 

@@ -103,11 +103,6 @@ for j, batch in tqdm(enumerate(dataloader_comma)):
         inter = []
         for elem in top5_indices[max(i-20, 0):min(i+20,len(top5_indices))]:
             l = elem.cpu().numpy().tolist()
-            #TODO: why does it remove 131 and 55 -G.R.
-            if 131 in l:
-                l.remove(131)
-            if 55 in l:
-                l.remove(55)
             inter.extend(l)
         count_dict = Counter(inter)
         # Get the top 5 most occurring numbers
