@@ -117,11 +117,24 @@ class VTN(nn.Module):
         (scenarios, scenarios_tokens) = get_scenarios(self.concept_source)
         print(f"Using {len(scenarios)} scenarios")
         self.scenarios_tokens = scenarios_tokens
+        self.scenarios_size = len(scenarios)
         additional_feat_size = 3 if not concept_features else len(scenarios)+3
         
         for param in self.clip_model.parameters():
             param.requires_grad = False
-        
+        if self.concept_features == "retinanet" and self.train_concepts:
+            self.concept_adapter = nn.Linear(self.scenarios_size, self.scenarios_size, bias=True) #retinanet concepts
+            with torch.no_grad():
+                try:
+                    nn.init.eye_(self.concept_adapter.weight)  # inizializza come matrice identità
+                except Exception:
+                    self.concept_adapter.weight.copy_(torch.eye(self.scenario_size))
+                if self.concept_adapter.bias is not None:
+                    nn.init.zeros_(self.concept_adapter.bias)
+            print(f"Created concept adapter for retinanet with {self.scenario_size} concepts")
+        else:
+            self.concept_adapter = None
+
         if backbone == "vit":
             print("using vit backbone")
             self.backbone = vit_base_patch16_224(pretrained=True,num_classes=0,drop_path_rate=0.0,drop_rate=0.0)
@@ -209,8 +222,8 @@ class VTN(nn.Module):
             if self.concept_source == "retinanet":
                 
                 logits_per_image = []
-                main_dir = "/kaggle/input/noisy-concepts"
-                #main_dir = "/kaggle/input/road-logits"
+                #main_dir = "/kaggle/input/noisy-concepts"
+                main_dir = "/kaggle/input/road-logits"
                 for key in seq_key:
                     dir = f"{main_dir}/{key}.pt"
                     data = torch.load(dir)
@@ -262,6 +275,9 @@ class VTN(nn.Module):
             if self.concept_source == "retinanet":
                 probs = probs.to(x.device, dtype=torch.float32)
             
+            if self.concept_adapter is not None:
+                Bp, Fp, Cp = probs.shape
+                probs = self.concept_adapter(probs.reshape(Bp * Fp, Cp)).reshape(Bp, Fp, Cp)
             
             if not self.train_concepts: 
                 probs = probs.detach()
